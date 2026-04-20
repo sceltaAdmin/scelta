@@ -81,9 +81,9 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" data-testid="nav-logo"
             style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', flexShrink: 0, letterSpacing: '-0.3px' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
       <img src="/logo.png" alt="Scelta" style={{ height: 36, width: 36, objectFit: 'contain' }} />
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', letterSpacing: '-0.3px' }}>Scelt<span style={{ color: 'var(--fire)' }}>a</span></span>
+      <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', letterSpacing: '-0.3px' }}>celt<span style={{ color: 'var(--fire)' }}>a</span></span>
     </div>
   </Link>
 
