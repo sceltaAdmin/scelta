@@ -28,16 +28,27 @@ export default function Products() {
 
   useEffect(() => {
     setLoading(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     getProducts({ category, search, sort, page, limit: 12, ...(featured ? { featured } : {}) })
-      .then(res => { setProducts(res.data.products); setTotal(res.data.total); setPages(res.data.pages); })
+      .then(res => {
+        setProducts(res.data.products);
+        setTotal(res.data.total);
+        setPages(res.data.pages);
+      })
       .finally(() => setLoading(false));
   }, [category, search, sort, page, featured]);
 
   const setParam = (key, val) => {
     const p = new URLSearchParams(searchParams);
     if (val) p.set(key, val); else p.delete(key);
-    p.delete('page');
+    if (key !== 'page') p.delete('page');
     setSearchParams(p);
+  };
+
+  const goToPage = (p) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', String(p));
+    setSearchParams(params);
   };
 
   return (
@@ -46,6 +57,8 @@ export default function Products() {
         {category ? CATEGORIES.find(c => c.id === category)?.label : search ? `Results for "${search}"` : 'All Products'}
       </h1>
       <p style={{ color: 'var(--text-3)', marginBottom: 24 }}>{total} products found</p>
+
+      {/* Filters */}
       <div data-testid="filters-bar" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 32 }}>
         <select data-testid="category-filter" value={category} onChange={e => setParam('category', e.target.value)}
           style={{ padding: '8px 14px', borderRadius: 'var(--r-full)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', fontSize: 14 }}>
@@ -66,24 +79,60 @@ export default function Products() {
           </button>
         )}
       </div>
-      {loading ? <div className="page-loader"><div className="spinner" /></div> : products.length === 0 ? (
+
+      {/* Grid */}
+      {loading ? (
+        <div className="page-loader"><div className="spinner" /></div>
+      ) : products.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 20px', color: 'var(--text-3)' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
           <h3 style={{ fontSize: 20, marginBottom: 8, color: 'var(--text-1)' }}>No products found</h3>
+          <p>Try adjusting your filters or search term</p>
         </div>
       ) : (
         <div data-testid="products-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20, marginBottom: 40 }}>
           {products.map(p => <ProductCard key={p._id} product={p} />)}
         </div>
       )}
+
+      {/* Pagination */}
       {pages > 1 && (
-        <div data-testid="pagination" style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+        <div data-testid="pagination" style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20, flexWrap: 'wrap' }}>
+          {/* Prev */}
+          <button
+            onClick={() => goToPage(page - 1)}
+            disabled={page === 1}
+            style={{ padding: '8px 14px', borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: page === 1 ? 'var(--text-3)' : 'var(--text-1)', cursor: page === 1 ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
+            ←
+          </button>
+
+          {/* Page numbers */}
           {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
-            <button key={p} onClick={() => setParam('page', p)}
-              style={{ width: 36, height: 36, borderRadius: 'var(--r-sm)', border: '1.5px solid', borderColor: p === page ? 'var(--fire)' : 'var(--border)', background: p === page ? 'var(--fire)' : 'var(--bg-card)', color: p === page ? '#fff' : 'var(--text-1)', fontWeight: 600, cursor: 'pointer' }}>
+            <button
+              key={p}
+              onClick={() => goToPage(p)}
+              style={{
+                width: 40, height: 40,
+                borderRadius: 'var(--r-sm)',
+                border: '1.5px solid',
+                borderColor: p === page ? 'var(--fire)' : 'var(--border)',
+                background: p === page ? 'var(--fire)' : 'var(--bg-card)',
+                color: p === page ? '#fff' : 'var(--text-1)',
+                fontWeight: 700,
+                cursor: 'pointer',
+                fontSize: 14
+              }}>
               {p}
             </button>
           ))}
+
+          {/* Next */}
+          <button
+            onClick={() => goToPage(page + 1)}
+            disabled={page === pages}
+            style={{ padding: '8px 14px', borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: page === pages ? 'var(--text-3)' : 'var(--text-1)', cursor: page === pages ? 'not-allowed' : 'pointer', fontWeight: 600 }}>
+            →
+          </button>
         </div>
       )}
     </main>
