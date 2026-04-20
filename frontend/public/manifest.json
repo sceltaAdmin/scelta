@@ -1,0 +1,12 @@
+{
+  "name": "Scelta — Your Choice, Delivered",
+  "short_name": "Scelta",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0f10",
+  "theme_color": "#FF5722",
+  "icons": [
+    { "src": "https://via.placeholder.com/192x192/FF5722/FFFFFF?text=S", "sizes": "192x192", "type": "image/png" },
+    { "src": "https://via.placeholder.com/512x512/FF5722/FFFFFF?text=S", "sizes": "512x512", "type": "image/png" }
+  ]
+}
