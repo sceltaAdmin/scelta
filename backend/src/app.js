@@ -10,9 +10,20 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({
-  origin: [process.env.CLIENT_URL, 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:4173'],
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    if (
+      origin.includes('vercel.app') ||
+      origin.includes('localhost') ||
+      origin.includes('onrender.com')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
   credentials: true
 }));
+
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
