@@ -16,8 +16,7 @@ const CATEGORIES = [
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts]         = useState([]);
-  const [allProducts, setAllProducts]   = useState([]);
-  const [allBrands, setAllBrands]       = useState([]);
+  
   const [total, setTotal]               = useState(0);
   const [pages, setPages]               = useState(1);
   const [loading, setLoading]           = useState(true);
@@ -34,14 +33,7 @@ export default function Products() {
   const page     = Number(searchParams.get('page')) || 1;
   const featured = searchParams.get('featured') || '';
 
-  // Fetch all brands once on mount
-  useEffect(() => {
-    getProducts({ limit: 100 }).then(res => {
-      const brands = [...new Set(res.data.products.map(p => p.brand).filter(Boolean))].sort();
-      setAllBrands(brands);
-      setAllProducts(res.data.products);
-    });
-  }, []);
+  
 
   // Fetch filtered products from API
   useEffect(() => {
@@ -89,6 +81,8 @@ export default function Products() {
   const toggleAccordion = (key) => setAccordion(a => ({ ...a, [key]: !a[key] }));
 
   // Apply brand + rating filters on frontend
+  // Build brands from current products
+  const allBrands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
   const filteredProducts = products
     .filter(p => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
     .filter(p => minRating === 0 || p.rating >= minRating);
