@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" role="img">
+  <title>Scelta</title>
+  <circle cx="28" cy="30" r="26" fill="none" stroke="#FF5722" stroke-width="2"/>
+  <path d="M36 16 C36 16 20 16 20 23 C20 30 36 30 36 37 C36 44 20 44 20 44"
+        fill="none" stroke="#FF5722" stroke-width="3" stroke-linecap="round"/>
+  <path d="M30 40 L38 47 L30 54" fill="none" stroke="#FF5722" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="64" y="38" font-family="Georgia, serif" font-size="28" font-weight="400" fill="#FFFFFF" letter-spacing="-0.5">Scelt</text>
+  <text x="136" y="38" font-family="Georgia, serif" font-size="28" font-weight="400" fill="#FF5722" letter-spacing="-0.5">a</text>
+</svg>
