@@ -13,27 +13,20 @@ const CATEGORIES = [
   { id: 'toys', label: 'Toys' },
 ];
 
-const BRANDS = [
-  'Apple','Sony','Samsung','boAt','Canon','Logitech','DJI','Bose','LG',
-  'Penguin','Jaico','Manjul','Vintage','Lioncrest',
-  "Levi's",'Nike','Allen Solly','Fabindia','Uniqlo','Canada Goose',
-  'Instant Pot','Dyson','Philips','Nespresso','Le Creuset','Vitamix',
-  'Yonex','Adidas','Strauss','Nivia','Garmin','Lululemon','TaylorMade',
-  'LEGO','Nintendo','Razer','Hot Wheels','Funskool'
-];
-
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts] = useState([]);
-  const [total, setTotal]       = useState(0);
-  const [pages, setPages]       = useState(1);
-  const [loading, setLoading]   = useState(true);
+  const [products, setProducts]         = useState([]);
+  const [allProducts, setAllProducts]   = useState([]);
+  const [allBrands, setAllBrands]       = useState([]);
+  const [total, setTotal]               = useState(0);
+  const [pages, setPages]               = useState(1);
+  const [loading, setLoading]           = useState(true);
 
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [minPrice, setMinPrice]         = useState('');
+  const [maxPrice, setMaxPrice]         = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [minRating, setMinRating] = useState(0);
-  const [accordion, setAccordion] = useState({ price: true, brand: true, rating: true });
+  const [minRating, setMinRating]       = useState(0);
+  const [accordion, setAccordion]       = useState({ price: true, brand: true, rating: true });
 
   const category = searchParams.get('category') || '';
   const search   = searchParams.get('search') || '';
@@ -41,6 +34,16 @@ export default function Products() {
   const page     = Number(searchParams.get('page')) || 1;
   const featured = searchParams.get('featured') || '';
 
+  // Fetch all brands once on mount
+  useEffect(() => {
+    getProducts({ limit: 100 }).then(res => {
+      const brands = [...new Set(res.data.products.map(p => p.brand).filter(Boolean))].sort();
+      setAllBrands(brands);
+      setAllProducts(res.data.products);
+    });
+  }, []);
+
+  // Fetch filtered products from API
   useEffect(() => {
     setLoading(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -50,7 +53,11 @@ export default function Products() {
       ...(minPrice ? { minPrice } : {}),
       ...(maxPrice ? { maxPrice } : {}),
     })
-      .then(res => { setProducts(res.data.products); setTotal(res.data.total); setPages(res.data.pages); })
+      .then(res => {
+        setProducts(res.data.products);
+        setTotal(res.data.total);
+        setPages(res.data.pages);
+      })
       .finally(() => setLoading(false));
   }, [category, search, sort, page, featured, minPrice, maxPrice]);
 
@@ -81,9 +88,10 @@ export default function Products() {
 
   const toggleAccordion = (key) => setAccordion(a => ({ ...a, [key]: !a[key] }));
 
+  // Apply brand + rating filters on frontend
   const filteredProducts = products
     .filter(p => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
-    .filter(p => p.rating >= minRating);
+    .filter(p => minRating === 0 || p.rating >= minRating);
 
   const hasActiveFilters = category || search || featured || minPrice || maxPrice || selectedBrands.length > 0 || minRating > 0;
 
@@ -93,7 +101,7 @@ export default function Products() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--text-1)', marginBottom: 4 }}>
           {category ? CATEGORIES.find(c => c.id === category)?.label : search ? `Results for "${search}"` : 'All Products'}
         </h1>
-        <p style={{ color: 'var(--text-3)' }}>{total} products found</p>
+        <p style={{ color: 'var(--text-3)' }}>{filteredProducts.length} products found</p>
       </div>
 
       {/* Sort bar */}
@@ -121,9 +129,9 @@ export default function Products() {
       <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24, alignItems: 'start' }}>
 
         {/* ===== FILTER SIDEBAR ===== */}
-        <div data-testid="filter-sidebar" style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 20, position: 'sticky', top: 80 }}>
+        <div data-testid="filter-sidebar"
+          style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 20, position: 'sticky', top: 80 }}>
 
-          {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-1)' }}>Filters</span>
             <button data-testid="reset-filters-btn" onClick={resetFilters}
@@ -135,7 +143,7 @@ export default function Products() {
           {/* Price Range */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 4 }}>
             <button data-testid="filter-price-toggle" onClick={() => toggleAccordion('price')}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 12px 0' }}>
+              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12 }}>
               <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-1)' }}>💰 Price Range</span>
               <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{accordion.price ? '▲' : '▼'}</span>
             </button>
@@ -151,7 +159,7 @@ export default function Products() {
                 </div>
                 <input type="range" min="0" max="200000" step="1000"
                   value={maxPrice || 200000}
-                  onChange={e => setMaxPrice(e.target.value)}
+                  onChange={e => setMaxPrice(String(e.target.value))}
                   style={{ width: '100%', accentColor: 'var(--fire)', marginBottom: 6 }} />
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'var(--text-3)' }}>
                   <span>₹0</span><span>₹2,00,000</span>
@@ -163,14 +171,16 @@ export default function Products() {
           {/* Brand */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 4 }}>
             <button data-testid="filter-brand-toggle" onClick={() => toggleAccordion('brand')}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 12px 0' }}>
+              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12 }}>
               <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-1)' }}>🏷️ Brand</span>
               <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{accordion.brand ? '▲' : '▼'}</span>
             </button>
             {accordion.brand && (
-              <div data-testid="filter-brand-panel" style={{ maxHeight: 180, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {BRANDS.map(brand => (
-                  <label key={brand} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'var(--text-1)' }}>
+              <div data-testid="filter-brand-panel"
+                style={{ maxHeight: 200, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {allBrands.map(brand => (
+                  <label key={brand}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'var(--text-1)' }}>
                     <input type="checkbox"
                       data-testid={`brand-checkbox-${brand.replace(/[\s']/g, '-').toLowerCase()}`}
                       checked={selectedBrands.includes(brand)}
@@ -186,7 +196,7 @@ export default function Products() {
           {/* Min Rating */}
           <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
             <button data-testid="filter-rating-toggle" onClick={() => toggleAccordion('rating')}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 12px 0' }}>
+              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12 }}>
               <span style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-1)' }}>⭐ Min Rating</span>
               <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{accordion.rating ? '▲' : '▼'}</span>
             </button>
@@ -231,7 +241,8 @@ export default function Products() {
               </button>
             </div>
           ) : (
-            <div data-testid="products-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 40 }}>
+            <div data-testid="products-grid"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 40 }}>
               {filteredProducts.map(p => <ProductCard key={p._id} product={p} />)}
             </div>
           )}
