@@ -15,6 +15,9 @@ import Orders from './pages/Orders';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Help from './pages/Help';
+import Checkout from './pages/Checkout';
+import SizeGuide from './pages/SizeGuide';
 
 export default function App() {
   return (
@@ -34,6 +37,9 @@ export default function App() {
               <Route path="/login"        element={<Login />} />
               <Route path="/register"     element={<Register />} />
               <Route path="/profile"      element={<Profile />} />
+              <Route path="/help"         element={<Help />} />
+              <Route path="/checkout"     element={<Checkout />} />
+              <Route path="/size-guide"   element={<SizeGuide />} />
             </Routes>
             <Footer />
             <ChatBot />
