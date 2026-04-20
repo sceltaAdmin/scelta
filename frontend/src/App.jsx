@@ -5,6 +5,7 @@ import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ChatBot from './components/ChatBot';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
@@ -35,6 +36,7 @@ export default function App() {
               <Route path="/profile"      element={<Profile />} />
             </Routes>
             <Footer />
+            <ChatBot />
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>
