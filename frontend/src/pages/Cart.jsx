@@ -58,40 +58,76 @@ export default function Cart() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 32 }}>
+          {/* Cart items */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {items.map(item => (
-              <div key={item._id} data-testid={`cart-item-${item._id}`} style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 20, display: 'flex', gap: 16, alignItems: 'center' }}>
-                <img src={item.product?.image} alt={item.product?.name} style={{ width: 80, height: 80, objectFit: 'contain', borderRadius: 'var(--r-sm)', background: 'var(--bg-card-2)', padding: 8 }} />
+              <div key={item._id} data-testid={`cart-item-${item._id}`}
+                style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 20, display: 'flex', gap: 16, alignItems: 'center' }}>
+                <img src={item.product?.image} alt={item.product?.name}
+                  style={{ width: 80, height: 80, objectFit: 'contain', borderRadius: 'var(--r-sm)', background: 'var(--bg-card-2)', padding: 8 }} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-1)', marginBottom: 4 }}>{item.product?.name}</div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-1)' }}>₹{item.price?.toLocaleString()}</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid var(--border)', borderRadius: 'var(--r-full)' }}>
-                  <button onClick={() => updateItem(item._id, item.quantity - 1)} style={{ padding: '6px 12px', background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: 'var(--text-1)' }}>−</button>
-                  <span data-testid={`cart-qty-${item._id}`} style={{ padding: '6px 12px', fontWeight: 600, color: 'var(--text-1)' }}>{item.quantity}</span>
-                  <button onClick={() => updateItem(item._id, item.quantity + 1)} style={{ padding: '6px 12px', background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: 'var(--text-1)' }}>+</button>
+                  <button onClick={() => updateItem(item._id, item.quantity - 1)}
+                    style={{ padding: '6px 12px', background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: 'var(--text-1)' }}>−</button>
+                  <span data-testid={`cart-qty-${item._id}`}
+                    style={{ padding: '6px 12px', fontWeight: 600, color: 'var(--text-1)' }}>{item.quantity}</span>
+                  <button onClick={() => updateItem(item._id, item.quantity + 1)}
+                    style={{ padding: '6px 12px', background: 'none', border: 'none', fontSize: 16, cursor: 'pointer', color: 'var(--text-1)' }}>+</button>
                 </div>
                 <button data-testid={`remove-cart-item-${item._id}`} onClick={() => removeItem(item._id)}
                   style={{ background: 'var(--red-pale)', border: 'none', borderRadius: 'var(--r-sm)', padding: '6px 10px', color: 'var(--red)', cursor: 'pointer', fontSize: 16 }}>🗑</button>
               </div>
             ))}
           </div>
+
+          {/* Order summary */}
           <div style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 24, height: 'fit-content', position: 'sticky', top: 80 }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 20, color: 'var(--text-1)' }}>Order Summary</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, color: 'var(--text-2)' }}><span>Subtotal</span><span>₹{subtotal.toLocaleString()}</span></div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, color: 'var(--text-2)' }}><span>Delivery</span><span style={{ color: delivery === 0 ? 'var(--green)' : '' }}>{delivery === 0 ? 'FREE' : `₹${delivery}`}</span></div>
-            {discount > 0 && <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, color: 'var(--green)', fontWeight: 600 }}><span>Discount</span><span>−₹{discount}</span></div>}
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, marginTop: 12, display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, color: 'var(--text-1)' }}><span>Total</span><span>₹{total.toLocaleString()}</span></div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, color: 'var(--text-2)' }}>
+              <span>Subtotal</span><span>₹{subtotal.toLocaleString()}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, color: 'var(--text-2)' }}>
+              <span>Delivery</span>
+              <span style={{ color: delivery === 0 ? 'var(--green)' : '' }}>{delivery === 0 ? 'FREE' : `₹${delivery}`}</span>
+            </div>
+            {discount > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 14, color: 'var(--green)', fontWeight: 600 }}>
+                <span>Discount</span><span>−₹{discount}</span>
+              </div>
+            )}
+            <div style={{ borderTop: '1px solid var(--border)', paddingTop: 12, marginTop: 12, display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: 18, color: 'var(--text-1)' }}>
+              <span>Total</span><span>₹{total.toLocaleString()}</span>
+            </div>
+
+            {/* Coupon */}
             <div style={{ marginTop: 20, display: 'flex', gap: 8 }}>
-              <input data-testid="coupon-input" value={coupon} onChange={e => setCoupon(e.target.value.toUpperCase())} placeholder="Coupon code"
+              <input data-testid="coupon-input" value={coupon}
+                onChange={e => setCoupon(e.target.value.toUpperCase())} placeholder="Coupon code"
                 style={{ flex: 1, padding: '8px 12px', borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', fontSize: 13 }} />
               <button data-testid="apply-coupon-btn" onClick={handleCoupon}
-                style={{ padding: '8px 14px', background: 'var(--fire)', color: '#fff', border: 'none', borderRadius: 'var(--r-sm)', fontWeight: 600, cursor: 'pointer' }}>Apply</button>
+                style={{ padding: '8px 14px', background: 'var(--fire)', color: '#fff', border: 'none', borderRadius: 'var(--r-sm)', fontWeight: 600, cursor: 'pointer' }}>
+                Apply
+              </button>
             </div>
-            <button data-testid="place-order-btn" onClick={handlePlaceOrder} disabled={placing}
-              style={{ width: '100%', marginTop: 20, padding: '14px', background: 'var(--fire)', color: '#fff', border: 'none', borderRadius: 'var(--r-full)', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
-              {placing ? 'Placing Order...' : 'Place Order'}
+
+            {/* Proceed to Checkout */}
+            <button data-testid="proceed-to-checkout-btn" onClick={() => navigate('/checkout')}
+              style={{ width: '100%', marginTop: 16, padding: '14px', background: 'transparent', color: 'var(--fire)', border: '1.5px solid var(--fire)', borderRadius: 'var(--r-full)', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
+              Proceed to Checkout
             </button>
+
+            {/* Quick Place Order */}
+            <button data-testid="place-order-btn" onClick={handlePlaceOrder} disabled={placing}
+              style={{ width: '100%', marginTop: 10, padding: '14px', background: 'var(--fire)', color: '#fff', border: 'none', borderRadius: 'var(--r-full)', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
+              {placing ? 'Placing Order...' : 'Quick Place Order'}
+            </button>
+            <p style={{ fontSize: 11, color: 'var(--text-3)', textAlign: 'center', marginTop: 6 }}>
+              Quick order uses default address · Use Checkout for delivery slot
+            </p>
           </div>
         </div>
       )}

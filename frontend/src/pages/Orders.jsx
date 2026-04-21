@@ -13,7 +13,7 @@ function Tooltip({ text, children }) {
       onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
       {children}
       {show && (
-        <div data-testid="tooltip" style={{ position: 'absolute', bottom: 'calc(100% + 6px)', left: '50%', transform: 'translateX(-50%)', background: '#1a1c1e', color: '#fff', fontSize: 11, fontWeight: 500, padding: '5px 10px', borderRadius: 6, whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none' }}>
+        <div data-testid="tooltip" style={{ position: 'fixed', bottom: 'auto', top: 'auto', marginTop: -40, left: '50%', transform: 'translateX(-50%)', background: '#1a1c1e', color: '#fff', fontSize: 11, fontWeight: 500, padding: '5px 10px', borderRadius: 6, whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none' }}>
           {text}
           <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', borderWidth: 4, borderStyle: 'solid', borderColor: '#1a1c1e transparent transparent transparent' }} />
         </div>
@@ -106,7 +106,7 @@ export default function Orders() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {orders.map(order => (
             <div key={order._id} data-testid={`order-card-${order._id}`}
-              style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+              style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', overflow: 'visible' }}>
 
               {/* Order header */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px 24px', background: 'var(--bg-card-2)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 8 }}>
