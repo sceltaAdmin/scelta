@@ -14,6 +14,7 @@ const CATEGORIES = [
   { id: 'home-kitchen', label: 'Home & Kitchen' },
   { id: 'sports', label: 'Sports' },
   { id: 'toys', label: 'Toys' },
+  { id: 'coupons', label: 'Coupons' },
 ];
 
 export default function Navbar() {
