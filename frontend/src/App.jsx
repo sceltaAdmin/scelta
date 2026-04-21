@@ -6,7 +6,6 @@ import { WishlistProvider } from './context/WishlistContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ChatBot from './components/ChatBot';
-import BackendWakeup from './components/BackendWakeup';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
@@ -30,7 +29,6 @@ import ShadowDomPage from './pages/ShadowDom';
 export default function App() {
   return (
     <BrowserRouter>
-      <BackendWakeup>
       <AuthProvider>
         <CartProvider>
           <WishlistProvider>
@@ -61,7 +59,6 @@ export default function App() {
           </WishlistProvider>
         </CartProvider>
       </AuthProvider>
-      </BackendWakeup>
     </BrowserRouter>
   );
 }
