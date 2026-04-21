@@ -3,7 +3,37 @@ import axios from 'axios';
 const API = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000',
   withCredentials: true,
+  timeout: 30000,
 });
+
+// Slow request warning
+let slowTimer;
+API.interceptors.request.use(config => {
+  slowTimer = setTimeout(() => {
+    console.warn('Request is taking longer than usual...');
+  }, 8000);
+  return config;
+});
+
+API.interceptors.response.use(
+  response => { clearTimeout(slowTimer); return response; },
+  error => { clearTimeout(slowTimer); return Promise.reject(error); }
+);
+
+// Retry failed requests once
+API.interceptors.response.use(
+  response => response,
+  async error => {
+    const config = error.config;
+    if (!config || config._retry) return Promise.reject(error);
+    if (error.code === 'ECONNABORTED' || !error.response) {
+      config._retry = true;
+      await new Promise(r => setTimeout(r, 2000));
+      return API(config);
+    }
+    return Promise.reject(error);
+  }
+);
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem('scelta_token');

@@ -59,7 +59,26 @@ export default function ProductDetail() {
     }
   };
 
-  if (loading) return <div className="page-loader"><div className="spinner" /></div>;
+  if (loading) return (
+    <main style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 20px' }}>
+      <style>{'@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}'}</style>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginBottom: 40 }}>
+        <div style={{ background: 'var(--bg-card-2)', borderRadius: 'var(--r-xl)', minHeight: 400, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingTop: 16 }}>
+          {[60, 40, 30, 80, 80, 50].map((w, i) => (
+            <div key={i} style={{ height: i === 0 ? 32 : i === 3 ? 100 : 16, width: w + '%', background: 'var(--bg-card-2)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+            </div>
+          ))}
+          <div style={{ height: 48, background: 'var(--bg-card-2)', borderRadius: 999, marginTop: 8, position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+          </div>
+        </div>
+      </div>
+    </main>
+  );
   if (!product) return <div style={{ textAlign: 'center', padding: 80 }}>Product not found</div>;
   const inWish = isInWishlist(product._id);
 

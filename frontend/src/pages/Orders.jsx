@@ -122,7 +122,49 @@ export default function Orders() {
     <main data-testid="orders-page" style={{ maxWidth: 900, margin: '0 auto', padding: '32px 20px' }}>
       <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--text-1)', marginBottom: 32 }}>My Orders</h1>
 
-      {loading ? <div className="page-loader"><div className="spinner" /></div> : orders.length === 0 ? (
+      {loading ? (
+        <div>
+          <style>{'@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}'}</style>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', marginBottom: 20, overflow: 'hidden' }}>
+              <div style={{ padding: '16px 24px', background: 'var(--bg-card-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {[120, 80].map((w, j) => (
+                    <div key={j} style={{ height: j === 0 ? 16 : 12, width: w, background: 'var(--bg-card)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {[80, 80, 80].map((w, j) => (
+                    <div key={j} style={{ height: 28, width: w, background: 'var(--bg-card)', borderRadius: 999, position: 'relative', overflow: 'hidden' }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ padding: '16px 24px' }}>
+                <div style={{ display: 'flex', gap: 12 }}>
+                  {[1,2].map(j => (
+                    <div key={j} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <div style={{ width: 48, height: 48, background: 'var(--bg-card-2)', borderRadius: 6, position: 'relative', overflow: 'hidden' }}>
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        {[100, 70].map((w, k) => (
+                          <div key={k} style={{ height: 10, width: w, background: 'var(--bg-card-2)', borderRadius: 4, position: 'relative', overflow: 'hidden' }}>
+                            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : orders.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 20px' }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>📦</div>
           <h3 style={{ fontSize: 20, color: 'var(--text-1)', marginBottom: 16 }}>No orders yet</h3>

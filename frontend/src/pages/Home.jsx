@@ -4,6 +4,8 @@ import { getProducts, getCategories } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import HeroCarousel from '../components/HeroCarousel';
 
+const shimmerStyle = `@keyframes shimmer { 0% { transform: translateX(-100%) } 100% { transform: translateX(100%) } }`;
+
 export default function Home() {
   const [featured, setFeatured]     = useState([]);
   const [categories, setCategories] = useState([]);
@@ -17,7 +19,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main data-testid="home-page">
+    <main data-testid="home-page"><style>{shimmerStyle}</style>
 
       {/* Hero Carousel */}
       <HeroCarousel />
@@ -68,7 +70,27 @@ export default function Home() {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--text-1)' }}>Featured Products</h2>
             <Link to="/products?featured=true" style={{ fontSize: 14, color: 'var(--fire)', fontWeight: 600 }}>View all →</Link>
           </div>
-          {loading ? <div className="page-loader"><div className="spinner" /></div> : (
+          {loading ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                  <div style={{ aspectRatio: '1', background: 'var(--bg-card-2)', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+                  </div>
+                  <div style={{ padding: 16 }}>
+                    {[90, 70, 50].map((w, j) => (
+                      <div key={j} style={{ height: 10, width: w + '%', background: 'var(--bg-card-2)', borderRadius: 4, marginBottom: 10, overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+                      </div>
+                    ))}
+                    <div style={{ height: 34, background: 'var(--bg-card-2)', borderRadius: 999, overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent)', animation: 'shimmer 1.5s infinite' }} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
               {featured.map(p => <ProductCard key={p._id} product={p} />)}
             </div>
