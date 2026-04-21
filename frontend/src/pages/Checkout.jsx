@@ -220,13 +220,13 @@ export default function Checkout() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
                 {PAYMENT_METHODS.map(method => (
                   <label key={method.id} data-testid={'payment-' + method.id.toLowerCase()}
-                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', borderRadius: 'var(--r-lg)', border: '1.5px solid', borderColor: paymentMethod === method.id ? 'var(--fire)' : 'var(--border)', background: paymentMethod === method.id ? 'var(--fire-pale)' : 'var(--bg-card)', cursor: 'pointer' }}>
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 20px', borderRadius: 'var(--r-lg)', border: '1.5px solid', borderColor: paymentMethod === method.id ? 'var(--fire)' : 'var(--border)', background: paymentMethod === method.id ? 'rgba(255,87,34,0.15)' : 'var(--bg-card)', cursor: 'pointer' }}>
                     <input type="radio" name="paymentMethod" value={method.id}
                       checked={paymentMethod === method.id} onChange={() => setPaymentMethod(method.id)}
                       style={{ accentColor: 'var(--fire)', width: 16, height: 16 }} />
                     <div style={{ width: 40, height: 28, background: 'var(--bg-card-2)', border: '1px solid var(--border)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: 'var(--text-2)' }}>{method.icon}</div>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-1)' }}>{method.label}</div>
+                      <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-1)', opacity: 1 }}>{method.label}</div>
                       <div style={{ fontSize: 12, color: 'var(--text-3)' }}>{method.desc}</div>
                     </div>
                   </label>
