@@ -24,18 +24,14 @@ export default function Footer() {
             ))}
           </div>
           <div>
-            <div style={{ color: '#fff', fontWeight: 600, marginBottom: 16 }}>Support</div>
-            {[['Help & FAQ', '/help'], ['Size Guide', '/size-guide']].map(([l, h]) => (
+            <div style={{ color: '#fff', fontWeight: 600, marginBottom: 16 }}>Testing Pages</div>
+            {[['Help & FAQ', '/help'], ['Tab Interactions', '/tabs'], ['Nested Frames', '/frames'], ['Multi Select', '/multi-select'], ['Size Guide Table', '/size-guide']].map(([l, h]) => (
               <Link key={l} to={h} style={{ display: 'block', fontSize: 13, marginBottom: 8, color: '#9ca3af' }}>{l}</Link>
-            ))}
-            <div style={{ color: '#fff', fontWeight: 600, marginTop: 16, marginBottom: 12 }}>Coupons</div>
-            {['SCELTA10', 'SCELTA20', 'FLAT100', 'NEWUSER'].map(c => (
-              <div key={c} style={{ fontSize: 12, marginBottom: 6, fontFamily: 'monospace', background: 'rgba(255,87,34,0.1)', padding: '3px 8px', borderRadius: 4, color: 'var(--fire)', display: 'inline-block', marginRight: 6 }}>{c}</div>
             ))}
           </div>
         </div>
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 24, textAlign: 'center', fontSize: 13 }}>
-          © 2026 Scelta — Your Choice, Delivered.
+          2026 Scelta - Your Choice, Delivered.
         </div>
       </div>
     </footer>
