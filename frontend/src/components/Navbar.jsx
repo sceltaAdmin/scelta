@@ -89,7 +89,7 @@ export default function Navbar() {
   return (
     <header data-testid="navbar" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
       <style>{`
-        .nav-search-desktop { display: ${isMobile ? 'none' : 'block'}; flex: 1; max-width: 560px; position: relative; }
+        .nav-search-desktop { display: ${isMobile ? 'none' : 'block'}; flex: 1; max-width: 480px; position: relative; }
         .nav-search-mobile { display: ${isMobile ? 'block' : 'none'}; }
         .mobile-search-overlay { display: ${showMobileSearch ? 'block' : 'none'}; }
         @media (max-width: 768px) {
@@ -100,7 +100,7 @@ export default function Navbar() {
 
       {/* Main nav */}
       <nav style={{ background: 'var(--bg-nav)', padding: isMobile ? '0 12px' : '0 24px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 16, height: isMobile ? 56 : 64 }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 16, height: isMobile ? 56 : 60 }}>
 
           {/* Logo */}
           <Link to="/" data-testid="nav-logo"
@@ -153,7 +153,7 @@ export default function Navbar() {
           {isMobile && <div style={{ flex: 1 }} />}
 
           {/* Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 2 : 4, flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 2 : 8, flexShrink: 0, marginLeft: isMobile ? 0 : 16 }}>
 
             {/* Mobile search icon */}
             {isMobile && (
