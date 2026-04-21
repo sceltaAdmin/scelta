@@ -22,6 +22,7 @@ import TabDemo from './pages/TabDemo';
 import FrameDemo from './pages/FrameDemo';
 import MultiSelect from './pages/MultiSelect';
 import DragDrop from './pages/DragDrop';
+import SessionTimeout from './components/SessionTimeout';
 
 export default function App() {
   return (
@@ -31,6 +32,7 @@ export default function App() {
           <WishlistProvider>
             <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
             <Navbar />
+            <SessionTimeout />
             <Routes>
               <Route path="/"               element={<Home />} />
               <Route path="/products"       element={<Products />} />

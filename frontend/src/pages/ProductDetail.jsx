@@ -5,6 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import ImageZoom from '../components/ImageZoom';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -69,9 +70,7 @@ export default function ProductDetail() {
       <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: 'var(--text-3)', marginBottom: 24, cursor: 'pointer', fontSize: 14 }}>← Back</button>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginBottom: 60 }}>
-        <div style={{ background: 'var(--bg-card-2)', borderRadius: 'var(--r-xl)', padding: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400 }}>
-          <img src={product.image} alt={product.name} style={{ maxHeight: 360, objectFit: 'contain', maxWidth: '100%' }} />
-        </div>
+        <ImageZoom src={product.image} alt={product.name} />
         <div>
           {product.badge && <span style={{ background: 'var(--fire)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 'var(--r-full)', marginBottom: 12, display: 'inline-block' }}>{product.badge}</span>}
           <h1 data-testid="product-detail-name" style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--text-1)', marginBottom: 12, lineHeight: 1.3 }}>{product.name}</h1>
