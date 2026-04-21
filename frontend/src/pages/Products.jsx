@@ -37,26 +37,26 @@ function SkeletonCard() {
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts]   = useState([]);
+  const [products, setProducts] = useState([]);
   const [allBrands, setAllBrands] = useState([]);
-  const [total, setTotal]         = useState(0);
-  const [page, setPage]           = useState(1);
-  const [hasMore, setHasMore]     = useState(true);
-  const [loading, setLoading]     = useState(true);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
 
-  const [minPrice, setMinPrice]           = useState('');
-  const [maxPrice, setMaxPrice]           = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [minRating, setMinRating]         = useState(0);
-  const [accordion, setAccordion]         = useState({ price: true, brand: true, rating: true });
+  const [minRating, setMinRating] = useState(0);
+  const [accordion, setAccordion] = useState({ price: true, brand: true, rating: true });
 
   const observerRef = useRef();
   const loadMoreRef = useRef();
 
   const category = searchParams.get('category') || '';
-  const search   = searchParams.get('search') || '';
-  const sort     = searchParams.get('sort') || 'newest';
+  const search = searchParams.get('search') || '';
+  const sort = searchParams.get('sort') || 'newest';
   const featured = searchParams.get('featured') || '';
 
   // Reset and fetch fresh when filters change
@@ -77,8 +77,8 @@ export default function Products() {
         ...(maxPrice ? { maxPrice } : {}),
       });
       const newProducts = res.data.products;
-      const totalCount  = res.data.total;
-      const totalPages  = res.data.pages;
+      const totalCount = res.data.total;
+      const totalPages = res.data.pages;
 
       setTotal(totalCount);
       setProducts(prev => reset ? newProducts : [...prev, ...newProducts]);
@@ -126,7 +126,7 @@ export default function Products() {
     setSearchParams({});
   };
 
-  const toggleBrand  = (brand) => setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
+  const toggleBrand = (brand) => setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
   const toggleAccordion = (key) => setAccordion(a => ({ ...a, [key]: !a[key] }));
 
   const filteredProducts = products
@@ -277,17 +277,15 @@ export default function Products() {
               <div data-testid="products-grid"
                 style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
                 {filteredProducts.map((p, index) => (
-                <div
-                  key={p._id}
-                  data-testid={"product-item-" + p._id}
-                  style={{
-                    animation: 'fadeInUp 0.4s ease forwards',
-                    animationDelay: (index % 12) * 40 + 'ms',
-                    opacity: 0,
-                  }}>
-                  <ProductCard product={p} />
-                </div>
-              ))}
+                  <div key={p._id}
+                    data-testid={`product-item-${p._id}`}
+                    style={{
+                      animation: `fadeInUp 0.35s ease both`,
+                      animationDelay: `${(index % 12) * 30}ms`,
+                    }}>
+                    <ProductCard product={p} />
+                  </div>
+                ))}
               </div>
 
               {/* Infinite scroll trigger */}
