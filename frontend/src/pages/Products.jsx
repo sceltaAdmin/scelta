@@ -30,7 +30,7 @@ function SkeletonCard() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)', animation: 'shimmer 1.5s infinite' }} />
         </div>
       </div>
-      <style>{`@keyframes shimmer { 0% { transform: translateX(-100%) } 100% { transform: translateX(100%) } }`}</style>
+      <style>{`@keyframes shimmer { 0% { transform: translateX(-100%) } 100% { transform: translateX(100%) } } @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
     </div>
   );
 }
@@ -276,7 +276,18 @@ export default function Products() {
             <>
               <div data-testid="products-grid"
                 style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
-                {filteredProducts.map(p => <ProductCard key={p._id} product={p} />)}
+                {filteredProducts.map((p, index) => (
+                <div
+                  key={p._id}
+                  data-testid={"product-item-" + p._id}
+                  style={{
+                    animation: 'fadeInUp 0.4s ease forwards',
+                    animationDelay: (index % 12) * 40 + 'ms',
+                    opacity: 0,
+                  }}>
+                  <ProductCard product={p} />
+                </div>
+              ))}
               </div>
 
               {/* Infinite scroll trigger */}
