@@ -33,7 +33,7 @@ export default function ProductCard({ product }) {
           style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 16 }} />
         {product.badge && <span style={{ position: 'absolute', top: 10, left: 10, background: 'var(--fire)', color: '#fff', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 'var(--r-full)' }}>{product.badge}</span>}
         <button data-testid={`wishlist-btn-${product._id}`} onClick={handleWishlist}
-          style={{ position: 'absolute', top: 10, right: 10, background: inWish ? 'var(--fire-pale)' : 'var(--bg-card)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
+          style={{ position: 'absolute', top: 10, right: 10, background: inWish ? 'var(--fire-pale)' : 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)', border: 'none', borderRadius: '50%', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
           {inWish ? '❤️' : '🤍'}
         </button>
       </div>
