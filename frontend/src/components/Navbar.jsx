@@ -61,6 +61,8 @@ export default function Navbar() {
   };
 
   const handleLogout = async () => {
+    const confirmed = window.confirm("Are you sure you want to logout?");
+    if (!confirmed) return;
     try { await logout(); } catch {}
     logoutUser();
     toast.success('Logged out successfully');
@@ -233,7 +235,7 @@ export default function Navbar() {
             const isActive = location.pathname === '/products' && activeCategory === id;
             return (
               <Link key={id}
-                to={id ? `/products?category=${id}` : '/products'}
+                to={id === 'coupons' ? '/coupons' : id ? `/products?category=${id}` : '/products'}
                 data-testid={`cat-${id || 'all'}`}
                 style={{
                   padding: '10px 14px', fontSize: 12.5, whiteSpace: 'nowrap', display: 'block',
