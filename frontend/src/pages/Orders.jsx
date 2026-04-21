@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getOrders, cancelOrder } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -10,12 +10,38 @@ function Tooltip({ text, children }) {
   const [show, setShow] = useState(false);
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}
-      onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}>
       {children}
       {show && (
-        <div data-testid="tooltip" style={{ position: 'fixed', bottom: 'auto', top: 'auto', marginTop: -40, left: '50%', transform: 'translateX(-50%)', background: '#1a1c1e', color: '#fff', fontSize: 11, fontWeight: 500, padding: '5px 10px', borderRadius: 6, whiteSpace: 'nowrap', zIndex: 9999, pointerEvents: 'none' }}>
+        <div data-testid="tooltip"
+          style={{
+            position: 'absolute',
+            bottom: 'calc(100% + 8px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#1a1c1e',
+            color: '#fff',
+            fontSize: 11,
+            fontWeight: 500,
+            padding: '5px 10px',
+            borderRadius: 6,
+            whiteSpace: 'nowrap',
+            zIndex: 99999,
+            pointerEvents: 'none',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+          }}>
           {text}
-          <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', borderWidth: 4, borderStyle: 'solid', borderColor: '#1a1c1e transparent transparent transparent' }} />
+          <div style={{
+            position: 'absolute',
+            top: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '5px solid transparent',
+            borderRight: '5px solid transparent',
+            borderTop: '5px solid #1a1c1e',
+          }} />
         </div>
       )}
     </div>
@@ -25,7 +51,7 @@ function Tooltip({ text, children }) {
 function downloadInvoice(order) {
   const lines = [
     '================================================',
-    '           SCELTA — YOUR CHOICE, DELIVERED      ',
+    '         SCELTA - YOUR CHOICE, DELIVERED        ',
     '================================================',
     `Invoice Number : INV-${order.orderNumber}`,
     `Order Number   : ${order.orderNumber}`,
@@ -35,12 +61,12 @@ function downloadInvoice(order) {
     '------------------------------------------------',
     'ITEMS ORDERED:',
     '------------------------------------------------',
-    ...order.items.map(item => `  ${item.name}\n    Qty: ${item.quantity} x ₹${item.price?.toLocaleString()} = ₹${(item.price * item.quantity).toLocaleString()}`),
+    ...order.items.map(item => `  ${item.name}\n    Qty: ${item.quantity} x Rs.${item.price?.toLocaleString()} = Rs.${(item.price * item.quantity).toLocaleString()}`),
     '------------------------------------------------',
-    `Subtotal       : ₹${order.subtotal?.toLocaleString()}`,
-    `Delivery Fee   : ₹${order.deliveryFee || 0}`,
-    `Discount       : -₹${order.discount || 0}`,
-    `TOTAL          : ₹${order.total?.toLocaleString()}`,
+    `Subtotal       : Rs.${order.subtotal?.toLocaleString()}`,
+    `Delivery Fee   : Rs.${order.deliveryFee || 0}`,
+    `Discount       : -Rs.${order.discount || 0}`,
+    `TOTAL          : Rs.${order.total?.toLocaleString()}`,
     '------------------------------------------------',
     'SHIPPING ADDRESS:',
     `  ${order.shippingAddress?.name}`,
@@ -65,8 +91,8 @@ function downloadInvoice(order) {
 
 export default function Orders() {
   const { isLoggedIn } = useAuth();
-  const [orders, setOrders]   = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [orders, setOrders]         = useState([]);
+  const [loading, setLoading]       = useState(true);
   const [expandedOrder, setExpandedOrder] = useState(null);
 
   useEffect(() => {
@@ -106,44 +132,53 @@ export default function Orders() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           {orders.map(order => (
             <div key={order._id} data-testid={`order-card-${order._id}`}
-              style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', overflow: 'visible' }}>
+              style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)' }}>
 
               {/* Order header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '16px 24px', background: 'var(--bg-card-2)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', background: 'var(--bg-card-2)', borderBottom: '1px solid var(--border)', flexWrap: 'wrap', gap: 8 }}>
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text-1)', marginBottom: 3 }}>#{order.orderNumber}</div>
                   <div style={{ fontSize: 12, color: 'var(--text-3)' }}>
                     {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+
+                {/* Action buttons — overflow visible so tooltips show correctly */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', overflow: 'visible' }}>
+
+                  {/* Status badge with tooltip */}
                   <Tooltip text={`Order is currently ${order.status}`}>
                     <span data-testid={`order-status-${order._id}`}
-                      style={{ padding: '4px 12px', borderRadius: 'var(--r-full)', fontSize: 12, fontWeight: 700, background: STATUS_COLORS[order.status] + '20', color: STATUS_COLORS[order.status], cursor: 'default' }}>
+                      style={{ padding: '5px 14px', borderRadius: 'var(--r-full)', fontSize: 12, fontWeight: 700, background: STATUS_COLORS[order.status] + '20', color: STATUS_COLORS[order.status], cursor: 'default', display: 'inline-block' }}>
                       {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                     </span>
                   </Tooltip>
 
-                  {['pending','confirmed'].includes(order.status) && (
+                  {/* Cancel button */}
+                  {['pending', 'confirmed'].includes(order.status) && (
                     <Tooltip text="Cancel this order">
                       <button data-testid={`cancel-order-${order._id}`} onClick={() => handleCancel(order._id)}
-                        style={{ padding: '4px 12px', border: '1.5px solid var(--red)', color: 'var(--red)', background: 'transparent', borderRadius: 'var(--r-full)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
+                        style={{ padding: '5px 14px', border: '1.5px solid var(--red)', color: 'var(--red)', background: 'transparent', borderRadius: 'var(--r-full)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
                         Cancel
                       </button>
                     </Tooltip>
                   )}
 
-                  <Tooltip text="Download invoice as text file">
+                  {/* Invoice download */}
+                  <Tooltip text="Download invoice">
                     <button data-testid={`download-invoice-${order._id}`} onClick={() => downloadInvoice(order)}
-                      style={{ padding: '4px 12px', border: '1.5px solid var(--border)', color: 'var(--text-2)', background: 'transparent', borderRadius: 'var(--r-full)', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}>
-                      ⬇ Invoice
+                      style={{ padding: '5px 14px', border: '1.5px solid var(--border)', color: 'var(--text-2)', background: 'transparent', borderRadius: 'var(--r-full)', fontSize: 12, cursor: 'pointer', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                      ↓ Invoice
                     </button>
                   </Tooltip>
 
-                  <button onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
-                    style={{ padding: '4px 12px', border: '1.5px solid var(--border)', color: 'var(--text-2)', background: 'transparent', borderRadius: 'var(--r-full)', fontSize: 12, cursor: 'pointer' }}>
-                    {expandedOrder === order._id ? '▲ Hide' : '▼ Details'}
-                  </button>
+                  {/* Details toggle */}
+                  <Tooltip text="View order details">
+                    <button onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                      style={{ padding: '5px 14px', border: '1.5px solid var(--border)', color: 'var(--text-2)', background: 'transparent', borderRadius: 'var(--r-full)', fontSize: 12, cursor: 'pointer' }}>
+                      {expandedOrder === order._id ? '▲ Hide' : '▼ Details'}
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
 
@@ -152,7 +187,8 @@ export default function Orders() {
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
                   {order.items.map(item => (
                     <div key={item._id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <img src={item.image} alt={item.name} style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 'var(--r-sm)', background: 'var(--bg-card-2)', padding: 4 }} />
+                      <img src={item.image} alt={item.name}
+                        style={{ width: 48, height: 48, objectFit: 'contain', borderRadius: 'var(--r-sm)', background: 'var(--bg-card-2)', padding: 4 }} />
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-1)' }}>{item.name}</div>
                         <div style={{ fontSize: 12, color: 'var(--text-3)' }}>Qty: {item.quantity} · ₹{item.price?.toLocaleString()}</div>
@@ -167,7 +203,7 @@ export default function Orders() {
                     style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--border)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Shipping To</div>
-                      <div style={{ fontSize: 13, color: 'var(--text-1)', lineHeight: 1.6 }}>
+                      <div style={{ fontSize: 13, color: 'var(--text-1)', lineHeight: 1.7 }}>
                         {order.shippingAddress?.name}<br />
                         {order.shippingAddress?.street}<br />
                         {order.shippingAddress?.city}, {order.shippingAddress?.state} - {order.shippingAddress?.pincode}
@@ -176,7 +212,7 @@ export default function Orders() {
                     <div>
                       <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-3)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 1 }}>Payment</div>
                       <div style={{ fontSize: 13, color: 'var(--text-1)' }}>{order.paymentMethod}</div>
-                      {order.notes && <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>📝 {order.notes}</div>}
+                      {order.notes && <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>Note: {order.notes}</div>}
                     </div>
                   </div>
                 )}

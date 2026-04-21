@@ -19,7 +19,8 @@ const validate = (form) => {
 const InputField = ({ label, testid, type = 'text', value, onChange, error, placeholder, maxLength }) => (
   <div style={{ marginBottom: 20 }}>
     <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)', display: 'block', marginBottom: 6 }}>{label}</label>
-    <input data-testid={testid} type={type} value={value} onChange={onChange} placeholder={placeholder} maxLength={maxLength}
+    <input data-testid={testid} type={type} value={value} onChange={onChange}
+      placeholder={placeholder} maxLength={maxLength}
       style={{ width: '100%', padding: '12px 16px', borderRadius: 'var(--r-md)', border: `1.5px solid ${error ? 'var(--red)' : 'var(--border)'}`, background: error ? 'var(--red-pale)' : 'var(--bg-card)', color: 'var(--text-1)', fontSize: 14, outline: 'none' }}
       onFocus={e => { if (!error) e.target.style.borderColor = 'var(--fire)'; }}
       onBlur={e => { if (!error) e.target.style.borderColor = 'var(--border)'; }} />
@@ -29,10 +30,9 @@ const InputField = ({ label, testid, type = 'text', value, onChange, error, plac
 
 export default function Profile() {
   const { isLoggedIn, loginUser, user: authUser } = useAuth();
-  const [form, setForm]       = useState({ name: '', phone: '', address: { street: '', city: '', state: '', pincode: '' } });
-  const [errors, setErrors]   = useState({});
-  const [loading, setLoading] = useState(false);
-  const [avatar, setAvatar]   = useState(null);
+  const [form, setForm]           = useState({ name: '', phone: '', address: { street: '', city: '', state: '', pincode: '' } });
+  const [errors, setErrors]       = useState({});
+  const [loading, setLoading]     = useState(false);
   const [avatarPreview, setAvatarPreview] = useState('');
   const [uploadMsg, setUploadMsg] = useState('');
   const fileRef = useRef();
@@ -53,9 +53,12 @@ export default function Profile() {
     const allowed = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowed.includes(file.type)) { toast.error('Only JPG, PNG or WebP images allowed'); return; }
     if (file.size > 2 * 1024 * 1024) { toast.error('Image must be under 2MB'); return; }
-    setAvatar(file);
-    setAvatarPreview(URL.createObjectURL(file));
-    setUploadMsg(`✅ ${file.name} (${(file.size / 1024).toFixed(1)} KB) ready to upload`);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setAvatarPreview(ev.target.result);
+      setUploadMsg(`${file.name} (${(file.size / 1024).toFixed(1)} KB) ready`);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleChange = (field, value) => {
@@ -71,7 +74,11 @@ export default function Profile() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate(form);
-    if (Object.keys(validationErrors).length > 0) { setErrors(validationErrors); toast.error('Please fix the errors before saving'); return; }
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error('Please fix the errors before saving');
+      return;
+    }
     setLoading(true);
     try {
       const res = await updateProfile({ ...form, avatar: avatarPreview });
@@ -96,29 +103,51 @@ export default function Profile() {
       <form data-testid="profile-form" onSubmit={handleSubmit}
         style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-xl)', border: '1px solid var(--border)', padding: 32 }}>
 
-        {/* Avatar upload */}
+        {/* Avatar section */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32, paddingBottom: 28, borderBottom: '1px solid var(--border)' }}>
-          <div style={{ position: 'relative', flexShrink: 0 }}>
+
+          {/* Avatar display — shows initials OR uploaded photo */}
+          <div style={{ flexShrink: 0 }}>
             {avatarPreview ? (
-              <img src={avatarPreview} alt="Avatar" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--fire)' }} />
+              <img
+                src={avatarPreview}
+                alt="Profile"
+                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--fire)', display: 'block' }}
+                onError={() => setAvatarPreview('')}
+              />
             ) : (
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: '#fff' }}>{initials}</div>
+              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: '#fff', border: '3px solid var(--fire)' }}>
+                {initials}
+              </div>
             )}
           </div>
+
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-1)', marginBottom: 4 }}>{authUser?.name}</div>
+            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-1)', marginBottom: 2 }}>{authUser?.name}</div>
             <div style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 12 }}>{authUser?.email}</div>
 
-            {/* File upload */}
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp"
-              data-testid="avatar-upload" onChange={handleFileChange}
-              style={{ display: 'none' }} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              data-testid="avatar-upload"
+              onChange={handleFileChange}
+              style={{ display: 'none' }}
+            />
             <button type="button" onClick={() => fileRef.current.click()}
               data-testid="avatar-upload-btn"
               style={{ padding: '8px 16px', background: 'transparent', border: '1.5px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 13, color: 'var(--text-1)', cursor: 'pointer', fontWeight: 600 }}>
-              📷 Upload Photo
+              Upload Photo
             </button>
-            {uploadMsg && <div style={{ fontSize: 12, color: 'var(--green)', marginTop: 6 }}>{uploadMsg}</div>}
+
+            {avatarPreview && (
+              <button type="button" onClick={() => { setAvatarPreview(''); setUploadMsg(''); }}
+                style={{ marginLeft: 8, padding: '8px 14px', background: 'transparent', border: '1.5px solid var(--red)', borderRadius: 'var(--r-full)', fontSize: 13, color: 'var(--red)', cursor: 'pointer', fontWeight: 600 }}>
+                Remove
+              </button>
+            )}
+
+            {uploadMsg && <div style={{ fontSize: 12, color: 'var(--green)', marginTop: 6 }}>✅ {uploadMsg}</div>}
             <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4 }}>JPG, PNG or WebP · Max 2MB</div>
           </div>
         </div>
@@ -149,7 +178,7 @@ export default function Profile() {
           error={errors.pincode} placeholder="560001" maxLength={6} />
 
         <button data-testid="save-profile-btn" type="submit" disabled={loading}
-          style={{ width: '100%', padding: 13, background: loading ? 'var(--border)' : 'var(--fire)', color: '#fff', border: 'none', borderRadius: 'var(--r-full)', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer' }}>
+          style={{ width: '100%', padding: 13, background: loading ? 'var(--border)' : 'var(--fire)', color: '#fff', border: 'none', borderRadius: 'var(--r-full)', fontSize: 15, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s' }}>
           {loading ? 'Saving...' : 'Save Profile'}
         </button>
       </form>
