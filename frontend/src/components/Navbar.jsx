@@ -179,10 +179,10 @@ export default function Navbar() {
                   style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#1a1c1e', border: '1px solid #2a2d30', borderRadius: 999, padding: '5px 12px 5px 5px', cursor: 'pointer', transition: 'border-color 0.2s' }}
                   onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--fire)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor = '#2a2d30'}>
-                  <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
+                  <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     {user?.avatar
-      ? <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      : <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>{initials}</div>
+      ? <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display='none'; }} />
+      : <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{initials}</span>
     }
   </div>
                   <span style={{ fontSize: 13, color: '#e5e7eb', fontWeight: 500, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</span>

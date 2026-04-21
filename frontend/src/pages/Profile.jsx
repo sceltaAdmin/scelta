@@ -81,7 +81,8 @@ export default function Profile() {
     }
     setLoading(true);
     try {
-      const res = await updateProfile({ ...form, avatar: avatarPreview });
+      const avatarToSave = avatarPreview && avatarPreview.startsWith('data:') ? '' : avatarPreview;
+      const res = await updateProfile({ ...form, avatar: avatarToSave });
       loginUser(localStorage.getItem('scelta_token'), res.data.user);
       toast.success('Profile updated successfully!');
     } catch { toast.error('Failed to update profile'); }
@@ -108,18 +109,18 @@ export default function Profile() {
 
           {/* Avatar display — shows initials OR uploaded photo */}
           <div style={{ flexShrink: 0 }}>
-            {avatarPreview ? (
-              <img
-                src={avatarPreview}
-                alt="Profile"
-                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--fire)', display: 'block' }}
-                onError={() => setAvatarPreview('')}
-              />
-            ) : (
-              <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: '#fff', border: '3px solid var(--fire)' }}>
-                {initials}
-              </div>
-            )}
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, fontWeight: 700, color: '#fff', border: '3px solid var(--fire)', overflow: 'hidden', position: 'relative' }}>
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Profile"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }}
+                  onError={() => setAvatarPreview('')}
+                />
+              ) : (
+                <span>{initials}</span>
+              )}
+            </div>
           </div>
 
           <div style={{ flex: 1 }}>
