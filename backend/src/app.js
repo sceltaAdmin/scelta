@@ -15,7 +15,8 @@ app.use(cors({
     if (
       origin.includes('vercel.app') ||
       origin.includes('localhost') ||
-      origin.includes('onrender.com')
+      origin.includes('onrender.com') ||
+      origin.includes('scelta.co.in')
     ) {
       return callback(null, true);
     }
