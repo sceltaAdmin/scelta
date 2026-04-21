@@ -71,7 +71,7 @@ export default function Home() {
             <Link to="/products?featured=true" style={{ fontSize: 14, color: 'var(--fire)', fontWeight: 600 }}>View all →</Link>
           </div>
           {loading ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 480 ? '1fr 1fr' : 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', overflow: 'hidden' }}>
                   <div style={{ aspectRatio: '1', background: 'var(--bg-card-2)', position: 'relative', overflow: 'hidden' }}>

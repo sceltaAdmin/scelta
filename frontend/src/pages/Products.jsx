@@ -176,9 +176,16 @@ export default function Products() {
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '240px 1fr', gap: 24, alignItems: 'start' }}>
         {/* Filter Sidebar */}
-        <div data-testid="filter-sidebar"
+        {isMobile && (
+          <button onClick={() => setShowFilters(f => !f)}
+            data-testid="mobile-filter-toggle"
+            style={{ padding: '10px 20px', background: 'var(--bg-card)', border: '1.5px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 14, fontWeight: 600, color: 'var(--text-1)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, width: '100%', justifyContent: 'center' }}>
+            Filters {showFilters ? '▲' : '▼'}
+          </button>
+        )}
+        {(!isMobile || showFilters) && <div data-testid="filter-sidebar"
           style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 20, position: 'sticky', top: 80 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
             <span style={{ fontWeight: 700, fontSize: 16, color: 'var(--text-1)' }}>Filters</span>
@@ -263,7 +270,7 @@ export default function Products() {
               </div>
             )}
           </div>
-        </div>
+        </div>}
 
         {/* Product Grid */}
         <div>
@@ -284,7 +291,7 @@ export default function Products() {
           ) : (
             <>
               <div data-testid="products-grid"
-                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20, marginBottom: 24 }}>
+                style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: isMobile ? 10 : 20, marginBottom: 24 }}>
                 {filteredProducts.map((p, index) => (
                   <div key={p._id}
                     data-testid={`product-item-${p._id}`}

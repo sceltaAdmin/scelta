@@ -23,14 +23,21 @@ export default function Navbar() {
   const { wishlist } = useWishlist();
   const navigate = useNavigate();
   const location = useLocation();
-  const [theme, setTheme]           = useState(localStorage.getItem('scelta_theme') || 'light');
-  const [search, setSearch]         = useState('');
+  const [theme, setTheme] = useState(localStorage.getItem('scelta_theme') || 'light');
+  const [search, setSearch] = useState('');
   const [suggestions, setSuggestions] = useState([]);
-  const [showSugg, setShowSugg]     = useState(false);
+  const [showSugg, setShowSugg] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const searchRef = useRef();
-  const userRef   = useRef();
+  const userRef = useRef();
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -58,11 +65,15 @@ export default function Navbar() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    if (search.trim()) { navigate(`/products?search=${encodeURIComponent(search)}`); setShowSugg(false); }
+    if (search.trim()) {
+      navigate(`/products?search=${encodeURIComponent(search)}`);
+      setShowSugg(false);
+      setShowMobileSearch(false);
+    }
   };
 
   const handleLogout = async () => {
-    const confirmed = window.confirm("Are you sure you want to logout?");
+    const confirmed = window.confirm('Are you sure you want to logout?');
     if (!confirmed) return;
     try { await logout(); } catch {}
     logoutUser();
@@ -73,104 +84,111 @@ export default function Navbar() {
 
   const initials = user?.name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '?';
   const firstName = user?.name?.split(' ')[0] || '';
-
   const activeCategory = new URLSearchParams(location.search).get('category') || '';
 
   return (
     <header data-testid="navbar" style={{ position: 'sticky', top: 0, zIndex: 1000 }}>
+      <style>{`
+        .nav-search-desktop { display: ${isMobile ? 'none' : 'block'}; flex: 1; max-width: 560px; position: relative; }
+        .nav-search-mobile { display: ${isMobile ? 'block' : 'none'}; }
+        .mobile-search-overlay { display: ${showMobileSearch ? 'block' : 'none'}; }
+        @media (max-width: 768px) {
+          .cat-subnav { font-size: 11px !important; }
+          .cat-subnav a { padding: 8px 10px !important; font-size: 11px !important; }
+        }
+      `}</style>
+
       {/* Main nav */}
-      <nav style={{ background: 'var(--bg-nav)', padding: '0 24px' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 16, height: 64 }}>
+      <nav style={{ background: 'var(--bg-nav)', padding: isMobile ? '0 12px' : '0 24px' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 16, height: isMobile ? 56 : 64 }}>
 
           {/* Logo */}
           <Link to="/" data-testid="nav-logo"
-            style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', flexShrink: 0, letterSpacing: '-0.3px' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-      <img src="/logo.png" alt="Scelta" style={{ height: 30, width: 30, objectFit: 'contain', marginRight: -6 }} />
-      <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: '#fff', letterSpacing: '-0.3px' }}>celt<span style={{ color: 'var(--fire)' }}>a</span></span>
-    </div>
-  </Link>
+            style={{ fontFamily: 'var(--font-display)', fontSize: isMobile ? 18 : 22, color: '#fff', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <img src="/logo.png" alt="Scelta" style={{ height: isMobile ? 24 : 30, width: isMobile ? 24 : 30, objectFit: 'contain', marginRight: -4 }} />
+              <span>celt<span style={{ color: 'var(--fire)' }}>a</span></span>
+            </div>
+          </Link>
 
-          {/* Search */}
-          <div ref={searchRef} style={{ flex: 1, maxWidth: 560, position: 'relative' }}>
+          {/* Desktop Search */}
+          <div ref={searchRef} className="nav-search-desktop">
             <form onSubmit={handleSearchSubmit}
-              style={{ display: 'flex', alignItems: 'center', background: '#1a1c1e', border: '1px solid #2a2d30', borderRadius: 999, overflow: 'hidden', transition: 'border-color 0.2s' }}
-              onFocus={e => e.currentTarget.style.borderColor = 'var(--fire)'}
-              onBlur={e => e.currentTarget.style.borderColor = '#2a2d30'}>
-              <span style={{ padding: '0 12px 0 16px', fontSize: 15, color: '#6b7280', flexShrink: 0 }}>🔍</span>
-              <input
-                data-testid="search-input"
-                value={search}
+              style={{ display: 'flex', alignItems: 'center', background: '#1a1c1e', border: '1px solid #2a2d30', borderRadius: 999, overflow: 'hidden' }}>
+              <span style={{ padding: '0 10px 0 14px', fontSize: 14, color: '#6b7280' }}>🔍</span>
+              <input data-testid="search-input" value={search}
                 onChange={e => handleSearch(e.target.value)}
                 placeholder="Search products, brands..."
-                style={{ flex: 1, border: 'none', padding: '10px 0', fontSize: 13.5, color: '#e5e7eb', background: 'transparent', outline: 'none' }}
-              />
+                style={{ flex: 1, border: 'none', padding: '10px 0', fontSize: 13, color: '#e5e7eb', background: 'transparent', outline: 'none' }} />
               {search && (
                 <button type="button" onClick={() => { setSearch(''); setSuggestions([]); }}
-                  style={{ padding: '0 14px', background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: 16 }}>×</button>
+                  style={{ padding: '0 10px', background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: 16 }}>×</button>
               )}
               <button data-testid="search-btn" type="submit"
-                style={{ padding: '8px 16px', background: 'var(--fire)', border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', borderRadius: '0 999px 999px 0', height: '100%', flexShrink: 0 }}>
+                style={{ padding: '8px 14px', background: 'var(--fire)', border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', borderRadius: '0 999px 999px 0' }}>
                 Search
               </button>
             </form>
-
-            {/* Suggestions */}
             {showSugg && suggestions.length > 0 && (
               <div data-testid="search-suggestions"
                 style={{ position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-xl)', zIndex: 9999, overflow: 'hidden' }}>
                 {suggestions.map(p => (
-                  <div key={p._id}
-                    onClick={() => { navigate(`/products/${p._id}`); setShowSugg(false); setSearch(''); }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border)', transition: 'background 0.1s' }}
+                  <div key={p._id} onClick={() => { navigate(`/products/${p._id}`); setShowSugg(false); setSearch(''); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'var(--snow)'}
                     onMouseLeave={e => e.currentTarget.style.background = ''}>
-                    <img src={p.image} alt={p.name} style={{ width: 38, height: 38, objectFit: 'contain', borderRadius: 6, background: 'var(--bg-card-2)', padding: 4 }} />
+                    <img src={p.image} alt={p.name} style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 6, background: 'var(--bg-card-2)', padding: 4 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-3)', textTransform: 'capitalize' }}>{p.brand} · {p.category}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{p.brand} · {p.category}</div>
                     </div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--fire)', flexShrink: 0 }}>₹{p.price.toLocaleString()}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--fire)' }}>₹{p.price?.toLocaleString()}</div>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
+          {/* Spacer on mobile */}
+          {isMobile && <div style={{ flex: 1 }} />}
+
           {/* Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 2 : 4, flexShrink: 0 }}>
+
+            {/* Mobile search icon */}
+            {isMobile && (
+              <button onClick={() => setShowMobileSearch(s => !s)}
+                style={{ background: 'transparent', border: 'none', color: '#9ca3af', padding: '8px', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                🔍
+              </button>
+            )}
 
             {/* Theme toggle */}
             <button data-testid="theme-toggle" onClick={() => setTheme(t => t === 'light' ? 'dark' : 'light')}
-              title={theme === 'light' ? 'Switch to dark' : 'Switch to light'}
-              style={{ background: 'transparent', border: 'none', color: '#9ca3af', padding: '8px', borderRadius: 8, fontSize: 17, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}>
+              style={{ background: 'transparent', border: 'none', color: '#9ca3af', padding: '8px', fontSize: isMobile ? 16 : 17, cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
               {theme === 'light' ? '🌙' : '☀️'}
             </button>
 
-            {/* Wishlist */}
-            <Link to="/wishlist" data-testid="nav-wishlist" title="Wishlist"
-              style={{ position: 'relative', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 17, borderRadius: 8, transition: 'color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}>
-              {wishlist.length > 0 ? '❤️' : '🤍'}
-              {wishlist.length > 0 && (
-                <span style={{ position: 'absolute', top: 2, right: 2, background: 'var(--fire)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 999, minWidth: 15, height: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px', border: '1.5px solid var(--bg-nav)' }}>
-                  {wishlist.length}
-                </span>
-              )}
-            </Link>
+            {/* Wishlist — hide on mobile */}
+            {!isMobile && (
+              <Link to="/wishlist" data-testid="nav-wishlist"
+                style={{ position: 'relative', padding: '8px', display: 'flex', alignItems: 'center', color: '#9ca3af', fontSize: 17 }}>
+                {wishlist.length > 0 ? '❤️' : '🤍'}
+                {wishlist.length > 0 && (
+                  <span style={{ position: 'absolute', top: 2, right: 2, background: 'var(--fire)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 999, minWidth: 15, height: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>
+                    {wishlist.length}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Cart */}
-            <Link to="/cart" data-testid="nav-cart" title="Cart"
-              style={{ position: 'relative', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: 17, borderRadius: 8, transition: 'color 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-              onMouseLeave={e => e.currentTarget.style.color = '#9ca3af'}>
+            <Link to="/cart" data-testid="nav-cart"
+              style={{ position: 'relative', padding: '8px', display: 'flex', alignItems: 'center', color: '#9ca3af', fontSize: isMobile ? 16 : 17 }}>
               🛒
               {cartCount > 0 && (
                 <span data-testid="cart-badge"
-                  style={{ position: 'absolute', top: 2, right: 2, background: 'var(--fire)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 999, minWidth: 15, height: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px', border: '1.5px solid var(--bg-nav)' }}>
+                  style={{ position: 'absolute', top: 2, right: 2, background: 'var(--fire)', color: '#fff', fontSize: 9, fontWeight: 700, borderRadius: 999, minWidth: 15, height: 15, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>
                   {cartCount}
                 </span>
               )}
@@ -180,16 +198,14 @@ export default function Navbar() {
             {isLoggedIn ? (
               <div ref={userRef} style={{ position: 'relative' }}>
                 <button data-testid="user-menu-btn" onClick={() => setShowUserMenu(v => !v)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#1a1c1e', border: '1px solid #2a2d30', borderRadius: 999, padding: '5px 12px 5px 5px', cursor: 'pointer', transition: 'border-color 0.2s' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--fire)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = '#2a2d30'}>
-                  <div style={{ width: 30, height: 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    {user?.avatar
-      ? <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display='none'; }} />
-      : <span style={{ fontSize: 11, fontWeight: 700, color: '#fff' }}>{initials}</span>
-    }
-  </div>
-                  <span style={{ fontSize: 13, color: '#e5e7eb', fontWeight: 500, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</span>
+                  style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 4 : 8, background: '#1a1c1e', border: '1px solid #2a2d30', borderRadius: 999, padding: isMobile ? '4px 8px 4px 4px' : '5px 12px 5px 5px', cursor: 'pointer' }}>
+                  <div style={{ width: isMobile ? 26 : 30, height: isMobile ? 26 : 30, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'linear-gradient(135deg, var(--fire), var(--fire-dark))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {user?.avatar
+                      ? <img src={user.avatar} alt={user.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { e.target.style.display = 'none'; }} />
+                      : <span style={{ fontSize: 10, fontWeight: 700, color: '#fff' }}>{initials}</span>
+                    }
+                  </div>
+                  {!isMobile && <span style={{ fontSize: 13, color: '#e5e7eb', fontWeight: 500, maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{firstName}</span>}
                   <span style={{ fontSize: 10, color: '#6b7280' }}>▾</span>
                 </button>
 
@@ -202,52 +218,80 @@ export default function Navbar() {
                     </div>
                     {[['👤', 'My Profile', '/profile'], ['📦', 'My Orders', '/orders'], ['🤍', 'Wishlist', '/wishlist'], ['🛒', 'Cart', '/cart']].map(([icon, label, path]) => (
                       <Link key={path} to={path} onClick={() => setShowUserMenu(false)}
-                        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13.5, color: 'var(--text-1)', borderBottom: '1px solid var(--border)', transition: 'background 0.1s' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', fontSize: 13.5, color: 'var(--text-1)', borderBottom: '1px solid var(--border)' }}
                         onMouseEnter={e => e.currentTarget.style.background = 'var(--snow)'}
                         onMouseLeave={e => e.currentTarget.style.background = ''}>
-                        <span style={{ fontSize: 15 }}>{icon}</span>{label}
+                        <span>{icon}</span>{label}
                       </Link>
                     ))}
                     <button data-testid="logout-btn" onClick={handleLogout}
-                      style={{ width: '100%', padding: '11px 16px', fontSize: 13.5, color: 'var(--red)', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10, transition: 'background 0.1s' }}
+                      style={{ width: '100%', padding: '11px 16px', fontSize: 13.5, color: 'var(--red)', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}
                       onMouseEnter={e => e.currentTarget.style.background = 'var(--red-pale)'}
                       onMouseLeave={e => e.currentTarget.style.background = ''}>
-                      <span style={{ fontSize: 15 }}>🚪</span> Logout
+                      <span>🚪</span> Logout
                     </button>
                   </div>
                 )}
               </div>
             ) : (
               <Link to="/login" data-testid="nav-login-btn"
-                style={{ padding: '8px 18px', background: 'var(--fire)', color: '#fff', borderRadius: 999, fontSize: 13, fontWeight: 600, marginLeft: 4, transition: 'background 0.2s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--fire-dark)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'var(--fire)'}>
+                style={{ padding: isMobile ? '6px 12px' : '8px 18px', background: 'var(--fire)', color: '#fff', borderRadius: 999, fontSize: isMobile ? 12 : 13, fontWeight: 600, marginLeft: 4 }}>
                 Login
               </Link>
             )}
           </div>
         </div>
+
+        {/* Mobile search bar — expands below navbar */}
+        {isMobile && showMobileSearch && (
+          <div ref={searchRef} style={{ padding: '8px 12px 12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+            <form onSubmit={handleSearchSubmit}
+              style={{ display: 'flex', alignItems: 'center', background: '#1a1c1e', border: '1px solid #2a2d30', borderRadius: 999, overflow: 'hidden' }}>
+              <span style={{ padding: '0 10px 0 14px', fontSize: 14, color: '#6b7280' }}>🔍</span>
+              <input data-testid="search-input" value={search} autoFocus
+                onChange={e => handleSearch(e.target.value)}
+                placeholder="Search products, brands..."
+                style={{ flex: 1, border: 'none', padding: '10px 0', fontSize: 14, color: '#e5e7eb', background: 'transparent', outline: 'none' }} />
+              {search && (
+                <button type="button" onClick={() => { setSearch(''); setSuggestions([]); }}
+                  style={{ padding: '0 10px', background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', fontSize: 16 }}>×</button>
+              )}
+              <button type="submit"
+                style={{ padding: '8px 14px', background: 'var(--fire)', border: 'none', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', borderRadius: '0 999px 999px 0' }}>
+                Go
+              </button>
+            </form>
+            {showSugg && suggestions.length > 0 && (
+              <div data-testid="search-suggestions"
+                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-xl)', zIndex: 9999, overflow: 'hidden', marginTop: 8 }}>
+                {suggestions.map(p => (
+                  <div key={p._id} onClick={() => { navigate(`/products/${p._id}`); setShowSugg(false); setSearch(''); setShowMobileSearch(false); }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', cursor: 'pointer', borderBottom: '1px solid var(--border)' }}>
+                    <img src={p.image} alt={p.name} style={{ width: 36, height: 36, objectFit: 'contain', borderRadius: 6, background: 'var(--bg-card-2)', padding: 4 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{p.brand}</div>
+                    </div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--fire)' }}>₹{p.price?.toLocaleString()}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </nav>
 
       {/* Category sub-nav */}
-      <div style={{ background: 'var(--bg-nav)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px', display: 'flex', overflowX: 'auto', scrollbarWidth: 'none' }}>
+      <div className="cat-subnav" style={{ background: 'var(--bg-nav)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: isMobile ? '0 8px' : '0 24px', display: 'flex', overflowX: 'auto', scrollbarWidth: 'none' }}>
           {CATEGORIES.map(({ id, label }) => {
-            const isActive = location.pathname === '/products' && activeCategory === id;
+            const isActive = location.pathname === '/products' && activeCategory === id ||
+              (id === 'coupons' && location.pathname === '/coupons');
             return (
               <Link key={id}
                 to={id === 'coupons' ? '/coupons' : id ? `/products?category=${id}` : '/products'}
                 data-testid={`cat-${id || 'all'}`}
-                style={{
-                  padding: '10px 14px', fontSize: 12.5, whiteSpace: 'nowrap', display: 'block',
-                  color: isActive ? '#fff' : '#9ca3af',
-                  borderBottom: isActive ? '2px solid var(--fire)' : '2px solid transparent',
-                  fontWeight: isActive ? 600 : 400,
-                  transition: 'all 0.15s',
-                  flexShrink: 0,
-                }}
-                onMouseEnter={e => { if (!isActive) { e.currentTarget.style.color = '#e5e7eb'; } }}
-                onMouseLeave={e => { if (!isActive) { e.currentTarget.style.color = '#9ca3af'; } }}>
+                style={{ padding: isMobile ? '8px 10px' : '10px 14px', fontSize: isMobile ? 11 : 12.5, whiteSpace: 'nowrap', display: 'block', color: isActive ? '#fff' : '#9ca3af', borderBottom: isActive ? '2px solid var(--fire)' : '2px solid transparent', fontWeight: isActive ? 600 : 400, flexShrink: 0 }}>
                 {label}
               </Link>
             );
