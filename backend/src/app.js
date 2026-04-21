@@ -28,6 +28,10 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 500 }));
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
+const session = require('express-session');
+const { passport } = require('./routes/googleAuth');
+app.use(session({ secret: process.env.JWT_SECRET, resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 app.get('/health', (req, res) => res.json({ status: 'ok', app: 'Scelta API', time: new Date() }));
@@ -41,6 +45,7 @@ app.use('/api/orders',     require('./routes/orders'));
 app.use('/api/reviews',    require('./routes/reviews'));
 app.use('/api/coupons',    require('./routes/coupons'));
 app.use('/api/profile',    require('./routes/profile'));
+app.use('/api/auth/google',  require('./routes/googleAuth').router);
 app.use('/api/chat',       require('./routes/chat'));
 
 app.use((req, res) => res.status(404).json({ success: false, message: 'Route not found' }));

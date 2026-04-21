@@ -25,7 +25,7 @@ export default function Footer() {
           </div>
           <div>
             <div style={{ color: '#fff', fontWeight: 600, marginBottom: 16 }}>Testing Pages</div>
-            {[['Help & FAQ', '/help'], ['Tab Interactions', '/tabs'], ['Nested Frames', '/frames'], ['Multi Select', '/multi-select'], ['Size Guide Table', '/size-guide']].map(([l, h]) => (
+            {[['Help & FAQ', '/help'], ['Tab Interactions', '/tabs'], ['Nested Frames', '/frames'], ['Multi Select', '/multi-select'], ['Size Guide Table', '/size-guide'], ['Drag and Drop', '/drag-drop']].map(([l, h]) => (
               <Link key={l} to={h} style={{ display: 'block', fontSize: 13, marginBottom: 8, color: '#9ca3af' }}>{l}</Link>
             ))}
           </div>

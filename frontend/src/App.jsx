@@ -21,6 +21,7 @@ import SizeGuide from './pages/SizeGuide';
 import TabDemo from './pages/TabDemo';
 import FrameDemo from './pages/FrameDemo';
 import MultiSelect from './pages/MultiSelect';
+import DragDrop from './pages/DragDrop';
 
 export default function App() {
   return (
