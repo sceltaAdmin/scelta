@@ -81,8 +81,7 @@ export default function Profile() {
     }
     setLoading(true);
     try {
-      const avatarToSave = avatarPreview && avatarPreview.startsWith('data:') ? '' : avatarPreview;
-      const res = await updateProfile({ ...form, avatar: avatarToSave });
+      const res = await updateProfile({ ...form, avatar: avatarPreview });
       loginUser(localStorage.getItem('scelta_token'), res.data.user);
       toast.success('Profile updated successfully!');
     } catch { toast.error('Failed to update profile'); }
