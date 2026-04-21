@@ -50,7 +50,8 @@ export default function Products() {
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [minRating, setMinRating] = useState(0);
   const [accordion, setAccordion] = useState({ price: true, brand: true, rating: true });
-
+  const [showFilters, setShowFilters] = useState(false);
+  const isMobile = window.innerWidth < 768;
   const observerRef = useRef();
   const loadMoreRef = useRef();
 
@@ -166,8 +167,16 @@ export default function Products() {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24, alignItems: 'start' }}>
+      {/* Mobile filter toggle */}
+      <div style={{ display: 'none' }} className="mobile-filter-btn">
+        <button onClick={() => setShowFilters(f => !f)}
+          data-testid="mobile-filter-toggle"
+          style={{ padding: '10px 20px', background: 'var(--bg-card)', border: '1.5px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 14, fontWeight: 600, color: 'var(--text-1)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          ⚙ {showFilters ? 'Hide Filters' : 'Show Filters'}
+        </button>
+      </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 24, alignItems: 'start' }}>
         {/* Filter Sidebar */}
         <div data-testid="filter-sidebar"
           style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 20, position: 'sticky', top: 80 }}>

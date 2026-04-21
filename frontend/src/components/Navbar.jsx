@@ -28,6 +28,7 @@ export default function Navbar() {
   const [suggestions, setSuggestions] = useState([]);
   const [showSugg, setShowSugg]     = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const searchRef = useRef();
   const userRef   = useRef();
 
