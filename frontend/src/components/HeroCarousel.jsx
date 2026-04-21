@@ -63,7 +63,7 @@ export default function HeroCarousel() {
   const slide = SLIDES[current];
 
   return (
-    <div data-testid="hero-carousel" style={{ position: 'relative', overflow: 'hidden', background: slide.bg, transition: 'background 0.6s ease', minHeight: 420 }}>
+    <div data-testid="hero-carousel" style={{ position: 'relative', overflow: 'hidden', background: slide.bg, transition: 'background 0.6s ease', minHeight: window.innerWidth < 768 ? 260 : 420 }}>
       {/* Slides */}
       {SLIDES.map((s, i) => (
         <div key={i} data-testid={`hero-slide-${i}`}
@@ -74,11 +74,11 @@ export default function HeroCarousel() {
             pointerEvents: i === current ? 'auto' : 'none',
             transition: 'opacity 0.6s ease',
             background: s.bg,
-            minHeight: 420,
+            minHeight: window.innerWidth < 768 ? 260 : 420,
             display: 'flex',
             alignItems: 'center',
           }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 20px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 40 }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: window.innerWidth < 768 ? '24px 16px' : '60px 20px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: window.innerWidth < 768 ? 12 : 40 }}>
             {/* Content */}
             <div style={{ flex: 1, maxWidth: 600 }}>
               <div style={{ display: 'inline-block', background: 'rgba(255,87,34,0.15)', border: '1px solid rgba(255,87,34,0.3)', borderRadius: 999, padding: '6px 16px', fontSize: 12, color: 'var(--fire)', marginBottom: 20, fontWeight: 600 }}>
@@ -87,21 +87,21 @@ export default function HeroCarousel() {
               <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(32px, 5vw, 58px)', color: '#fff', lineHeight: 1.1, marginBottom: 16 }}>
                 {s.title}
               </h1>
-              <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.7)', marginBottom: 32, lineHeight: 1.7 }}>
+              <p style={{ fontSize: window.innerWidth < 768 ? 13 : 18, color: 'rgba(255,255,255,0.7)', marginBottom: window.innerWidth < 768 ? 16 : 32, lineHeight: 1.7 }}>
                 {s.sub}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 <button
                   data-testid={`hero-cta-${i}`}
                   onClick={() => navigate(`/products?category=${s.cat}`)}
-                  style={{ padding: '14px 32px', background: 'var(--fire)', color: '#fff', border: 'none', borderRadius: 999, fontSize: 15, fontWeight: 700, cursor: 'pointer', transition: 'transform 0.2s' }}
+                  style={{ padding: window.innerWidth < 768 ? '10px 20px' : '14px 32px', background: 'var(--fire)', color: '#fff', border: 'none', borderRadius: 999, fontSize: window.innerWidth < 768 ? 13 : 15, fontWeight: 700, cursor: 'pointer', transition: 'transform 0.2s' }}
                   onMouseEnter={e => e.target.style.transform = 'translateY(-2px)'}
                   onMouseLeave={e => e.target.style.transform = ''}>
                   {s.cta} →
                 </button>
                 <button
                   onClick={() => navigate('/products')}
-                  style={{ padding: '14px 28px', background: 'transparent', color: '#fff', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: 999, fontSize: 15, fontWeight: 600, cursor: 'pointer' }}>
+                  style={{ padding: window.innerWidth < 768 ? '10px 16px' : '14px 28px', background: 'transparent', color: '#fff', border: '1.5px solid rgba(255,255,255,0.25)', borderRadius: 999, fontSize: window.innerWidth < 768 ? 13 : 15, fontWeight: 600, cursor: 'pointer' }}>
                   View All Deals
                 </button>
               </div>
@@ -110,12 +110,12 @@ export default function HeroCarousel() {
             {/* Visual */}
             <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <div style={{
-                width: 200, height: 200,
+                width: window.innerWidth < 768 ? 100 : 200, height: window.innerWidth < 768 ? 100 : 200,
                 borderRadius: '30% 70% 70% 30% / 30% 30% 70% 70%',
                 background: `radial-gradient(circle, ${s.accent}33 0%, ${s.accent}11 60%, transparent 100%)`,
                 border: `2px solid ${s.accent}44`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 80,
+                fontSize: window.innerWidth < 768 ? 48 : 80,
                 animation: 'float 3s ease-in-out infinite',
                 boxShadow: `0 0 60px ${s.accent}22`
               }}>

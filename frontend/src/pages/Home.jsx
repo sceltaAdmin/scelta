@@ -45,10 +45,10 @@ export default function Home() {
       </div>
 
       {/* Categories */}
-      <section data-testid="categories-section" style={{ padding: '60px 20px' }}>
+      <section data-testid="categories-section" style={{ padding: window.innerWidth < 768 ? '32px 12px' : '60px 20px' }}>
         <div className="container">
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--text-1)', marginBottom: 32, textAlign: 'center' }}>Shop by Category</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
             {categories.map(cat => (
               <Link key={cat.id} to={`/products?category=${cat.id}`} data-testid={`category-card-${cat.id}`}
                 style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: '24px 16px', textAlign: 'center', transition: 'all 0.2s', display: 'block' }}
@@ -64,7 +64,7 @@ export default function Home() {
       </section>
 
       {/* Featured Products */}
-      <section data-testid="featured-section" style={{ padding: '0 20px 60px' }}>
+      <section data-testid="featured-section" style={{ padding: window.innerWidth < 768 ? '0 12px 32px' : '0 20px 60px' }}>
         <div className="container">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--text-1)' }}>Featured Products</h2>
@@ -91,7 +91,7 @@ export default function Home() {
               ))}
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth < 768 ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(220px, 1fr))', gap: 20 }}>
               {featured.map(p => <ProductCard key={p._id} product={p} />)}
             </div>
           )}
@@ -99,9 +99,9 @@ export default function Home() {
       </section>
 
       {/* Promo Banner */}
-      <section style={{ padding: '0 20px 60px' }}>
+      <section style={{ padding: window.innerWidth < 768 ? '0 12px 32px' : '0 20px 60px' }}>
         <div className="container">
-          <div style={{ background: 'linear-gradient(135deg, var(--fire) 0%, var(--fire-dark) 100%)', padding: '60px 40px', textAlign: 'center', borderRadius: 'var(--r-xl)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ background: 'linear-gradient(135deg, var(--fire) 0%, var(--fire-dark) 100%)', padding: window.innerWidth < 768 ? '32px 20px' : '60px 40px', textAlign: 'center', borderRadius: 'var(--r-xl)', position: 'relative', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', top: '-40%', left: '-10%', width: 300, height: 300, background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
             <div style={{ position: 'relative', zIndex: 1 }}>
               <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(255,255,255,0.7)', marginBottom: 8 }}>EXCLUSIVE OFFER</div>
