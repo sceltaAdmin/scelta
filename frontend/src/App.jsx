@@ -23,6 +23,8 @@ import FrameDemo from './pages/FrameDemo';
 import MultiSelect from './pages/MultiSelect';
 import DragDrop from './pages/DragDrop';
 import SessionTimeout from './components/SessionTimeout';
+import Coupons from './pages/Coupons';
+import ShadowDomPage from './pages/ShadowDom';
 
 export default function App() {
   return (
@@ -34,21 +36,23 @@ export default function App() {
             <Navbar />
             <SessionTimeout />
             <Routes>
-              <Route path="/"               element={<Home />} />
-              <Route path="/products"       element={<Products />} />
-              <Route path="/products/:id"   element={<ProductDetail />} />
-              <Route path="/cart"           element={<Cart />} />
-              <Route path="/wishlist"       element={<Wishlist />} />
-              <Route path="/orders"         element={<Orders />} />
-              <Route path="/login"          element={<Login />} />
-              <Route path="/register"       element={<Register />} />
-              <Route path="/profile"        element={<Profile />} />
-              <Route path="/help"           element={<Help />} />
-              <Route path="/checkout"       element={<Checkout />} />
-              <Route path="/size-guide"     element={<SizeGuide />} />
-              <Route path="/tabs"           element={<TabDemo />} />
-              <Route path="/frames"         element={<FrameDemo />} />
-              <Route path="/multi-select"   element={<MultiSelect />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/size-guide" element={<SizeGuide />} />
+              <Route path="/tabs" element={<TabDemo />} />
+              <Route path="/frames" element={<FrameDemo />} />
+              <Route path="/multi-select" element={<MultiSelect />} />
+              <Route path='/coupons' element={<Coupons />} />
+              <Route path='/shadow-dom' element={<ShadowDomPage />} />
             </Routes>
             <Footer />
             <ChatBot />
