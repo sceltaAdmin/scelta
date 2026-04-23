@@ -277,7 +277,7 @@ export default function Products() {
                 style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: isMobile ? 10 : 20, marginBottom: 32 }}>
                 {filteredProducts.map((p, index) => (
                   <div key={p._id} data-testid={`product-item-${p._id}`}
-                    style={{ animation: 'fadeInUp 0.35s ease both', animationDelay: `${(index % 12) * 30}ms` }}>
+                    style={{ animation: 'fadeInUp 0.4s ease both', animationDelay: `${index * 50}ms` }}>
                     <ProductCard product={p} />
                   </div>
                 ))}
