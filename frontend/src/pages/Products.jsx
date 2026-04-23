@@ -37,17 +37,17 @@ function SkeletonCard() {
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts]     = useState([]);
-  const [allBrands, setAllBrands]   = useState([]);
-  const [total, setTotal]           = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-  const [loading, setLoading]       = useState(true);
-  const [minPrice, setMinPrice]     = useState('');
-  const [maxPrice, setMaxPrice]     = useState('');
+  const [products, setProducts]         = useState([]);
+  const [allBrands, setAllBrands]       = useState([]);
+  const [total, setTotal]               = useState(0);
+  const [totalPages, setTotalPages]     = useState(1);
+  const [loading, setLoading]           = useState(true);
+  const [minPrice, setMinPrice]         = useState('');
+  const [maxPrice, setMaxPrice]         = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [accordion, setAccordion]   = useState({ price: true, brand: true });
-  const [showFilters, setShowFilters] = useState(false);
-  const [isMobile, setIsMobile]     = useState(window.innerWidth < 768);
+  const [accordion, setAccordion]       = useState({ price: true, brand: true });
+  const [showFilters, setShowFilters]   = useState(false);
+  const [isMobile, setIsMobile]         = useState(window.innerWidth < 768);
 
   const category = searchParams.get('category') || '';
   const search   = searchParams.get('search')   || '';
@@ -64,12 +64,11 @@ export default function Products() {
   useEffect(() => {
     setLoading(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
     getProducts({
       category, search, sort, page, limit: 12,
-      ...(featured   ? { featured }   : {}),
-      ...(minPrice   ? { minPrice }   : {}),
-      ...(maxPrice   ? { maxPrice }   : {}),
+      ...(featured ? { featured } : {}),
+      ...(minPrice ? { minPrice } : {}),
+      ...(maxPrice ? { maxPrice } : {}),
     }).then(res => {
       setProducts(res.data.products || []);
       setTotal(res.data.total || 0);
@@ -99,25 +98,21 @@ export default function Products() {
   };
 
   const resetFilters = () => {
-    setMinPrice(''); setMaxPrice('');
-    setSelectedBrands([]); setMinRating(0);
+    setMinPrice('');
+    setMaxPrice('');
+    setSelectedBrands([]);
     setSearchParams({});
   };
 
   const toggleBrand     = (b) => setSelectedBrands(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
   const toggleAccordion = (k) => setAccordion(a => ({ ...a, [k]: !a[k] }));
 
-  const filteredProducts = products
-    .filter(p => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
-;
-
+  const filteredProducts = products.filter(p => selectedBrands.length === 0 || selectedBrands.includes(p.brand));
   const hasActiveFilters = category || search || featured || minPrice || maxPrice || selectedBrands.length > 0;
 
-  // Pagination page numbers
   const getPageNumbers = () => {
     const pages = [];
-    const delta = 2;
-    for (let i = Math.max(1, page - delta); i <= Math.min(totalPages, page + delta); i++) {
+    for (let i = Math.max(1, page - 2); i <= Math.min(totalPages, page + 2); i++) {
       pages.push(i);
     }
     return pages;
@@ -201,7 +196,7 @@ export default function Products() {
               </div>
 
               {/* Brand */}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 4 }}>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                 <button data-testid="filter-brand-toggle" onClick={() => toggleAccordion('brand')}
                   style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>🏷️ Brand</span>
@@ -222,6 +217,9 @@ export default function Products() {
                   </div>
                 )}
               </div>
+            </div>
+          )}
+        </div>
 
         {/* Product Grid */}
         <div>
@@ -255,33 +253,23 @@ export default function Products() {
               {totalPages > 1 && (
                 <div data-testid="pagination"
                   style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 16 }}>
-
-                  {/* Prev */}
                   <button data-testid="pagination-prev" onClick={() => goToPage(page - 1)} disabled={page === 1}
                     style={{ padding: '8px 16px', borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: page === 1 ? 'var(--text-3)' : 'var(--text-1)', cursor: page === 1 ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: 14 }}>
                     ← Prev
                   </button>
-
-                  {/* First page */}
                   {getPageNumbers()[0] > 1 && (
                     <>
                       <button onClick={() => goToPage(1)}
-                        style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
-                        1
-                      </button>
+                        style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>1</button>
                       {getPageNumbers()[0] > 2 && <span style={{ color: 'var(--text-3)' }}>...</span>}
                     </>
                   )}
-
-                  {/* Page numbers */}
                   {getPageNumbers().map(p => (
                     <button key={p} data-testid={`pagination-page-${p}`} onClick={() => goToPage(p)}
                       style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', border: '1.5px solid', borderColor: p === page ? 'var(--fire)' : 'var(--border)', background: p === page ? 'var(--fire)' : 'var(--bg-card)', color: p === page ? '#fff' : 'var(--text-1)', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>
                       {p}
                     </button>
                   ))}
-
-                  {/* Last page */}
                   {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
                     <>
                       {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && <span style={{ color: 'var(--text-3)' }}>...</span>}
@@ -291,14 +279,10 @@ export default function Products() {
                       </button>
                     </>
                   )}
-
-                  {/* Next */}
                   <button data-testid="pagination-next" onClick={() => goToPage(page + 1)} disabled={page === totalPages}
                     style={{ padding: '8px 16px', borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: page === totalPages ? 'var(--text-3)' : 'var(--text-1)', cursor: page === totalPages ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: 14 }}>
                     Next →
                   </button>
-
-                  {/* Page info */}
                   <span style={{ fontSize: 13, color: 'var(--text-3)', marginLeft: 8 }}>
                     Page {page} of {totalPages} · {total} products
                   </span>
