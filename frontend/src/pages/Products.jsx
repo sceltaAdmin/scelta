@@ -45,8 +45,7 @@ export default function Products() {
   const [minPrice, setMinPrice]     = useState('');
   const [maxPrice, setMaxPrice]     = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [minRating, setMinRating]   = useState(0);
-  const [accordion, setAccordion]   = useState({ price: true, brand: true, rating: true });
+  const [accordion, setAccordion]   = useState({ price: true, brand: true });
   const [showFilters, setShowFilters] = useState(false);
   const [isMobile, setIsMobile]     = useState(window.innerWidth < 768);
 
@@ -110,7 +109,7 @@ export default function Products() {
 
   const filteredProducts = products
     .filter(p => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
-    .filter(p => minRating === 0 || p.rating >= minRating);
+;
 
   const hasActiveFilters = category || search || featured || minPrice || maxPrice || selectedBrands.length > 0 || minRating > 0;
 
@@ -223,37 +222,6 @@ export default function Products() {
                   </div>
                 )}
               </div>
-
-              {/* Rating */}
-              <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-                <button data-testid="filter-rating-toggle" onClick={() => toggleAccordion('rating')}
-                  style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
-                  <span style={{ fontWeight: 600, fontSize: 14 }}>⭐ Min Rating</span>
-                  <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{accordion.rating ? '▲' : '▼'}</span>
-                </button>
-                {accordion.rating && (
-                  <div data-testid="filter-rating-panel" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {[4, 3, 2, 1].map(r => (
-                      <label key={r} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'var(--text-1)' }}>
-                        <input type="radio" name="minRating" data-testid={`rating-radio-${r}`}
-                          checked={minRating === r} onChange={() => setMinRating(r)}
-                          style={{ accentColor: 'var(--fire)', width: 14, height: 14 }} />
-                        <span style={{ color: 'var(--star)' }}>{'★'.repeat(r)}{'☆'.repeat(5 - r)}</span>
-                        <span style={{ color: 'var(--text-3)', fontSize: 12 }}>&amp; up</span>
-                      </label>
-                    ))}
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13, color: 'var(--text-1)' }}>
-                      <input type="radio" name="minRating" data-testid="rating-radio-all"
-                        checked={minRating === 0} onChange={() => setMinRating(0)}
-                        style={{ accentColor: 'var(--fire)', width: 14, height: 14 }} />
-                      All Ratings
-                    </label>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Product Grid */}
         <div>
