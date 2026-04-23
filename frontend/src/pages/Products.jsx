@@ -111,7 +111,7 @@ export default function Products() {
     .filter(p => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
 ;
 
-  const hasActiveFilters = category || search || featured || minPrice || maxPrice || selectedBrands.length > 0 || minRating > 0;
+  const hasActiveFilters = category || search || featured || minPrice || maxPrice || selectedBrands.length > 0;
 
   // Pagination page numbers
   const getPageNumbers = () => {
