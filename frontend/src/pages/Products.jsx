@@ -30,35 +30,39 @@ function SkeletonCard() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)', animation: 'shimmer 1.5s infinite' }} />
         </div>
       </div>
-      <style>{`@keyframes shimmer { 0% { transform: translateX(-100%) } 100% { transform: translateX(100%) } } @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+      <style>{`@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} } @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }`}</style>
     </div>
   );
 }
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts]       = useState([]);
-  const [allBrands, setAllBrands]     = useState([]);
-  const [total, setTotal]             = useState(0);
-  const [page, setPage]               = useState(1);
-  const [hasMore, setHasMore]         = useState(true);
-  const [loading, setLoading]         = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [minPrice, setMinPrice]       = useState('');
-  const [maxPrice, setMaxPrice]       = useState('');
+  const [products, setProducts]         = useState([]);
+  const [allBrands, setAllBrands]       = useState([]);
+  const [total, setTotal]               = useState(0);
+  const [hasMore, setHasMore]           = useState(true);
+  const [loading, setLoading]           = useState(true);
+  const [loadingMore, setLoadingMore]   = useState(false);
+  const [minPrice, setMinPrice]         = useState('');
+  const [maxPrice, setMaxPrice]         = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [minRating, setMinRating]     = useState(0);
-  const [accordion, setAccordion]     = useState({ price: true, brand: true, rating: true });
-  const [showFilters, setShowFilters] = useState(false);
-  const [isMobile, setIsMobile]       = useState(window.innerWidth < 768);
-  const observerRef = useRef();
+  const [minRating, setMinRating]       = useState(0);
+  const [accordion, setAccordion]       = useState({ price: true, brand: true, rating: true });
+  const [showFilters, setShowFilters]   = useState(false);
+  const [isMobile, setIsMobile]         = useState(window.innerWidth < 768);
+
   const loadMoreRef = useRef();
-  const pageRef     = useRef(1);
+  const stateRef    = useRef({});
 
   const category = searchParams.get('category') || '';
   const search   = searchParams.get('search')   || '';
   const sort     = searchParams.get('sort')     || 'newest';
   const featured = searchParams.get('featured') || '';
+
+  // Keep stateRef always current
+  useEffect(() => {
+    stateRef.current = { category, search, sort, featured, minPrice, maxPrice };
+  });
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -66,71 +70,93 @@ export default function Products() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // ── Main fetch — runs whenever filters change ──────────────
+  // ── Initial fetch when filters change ─────────────────────
   useEffect(() => {
     setProducts([]);
     setTotal(0);
-    setPage(1);
-    pageRef.current = 1;
     setHasMore(true);
     setLoading(true);
+    setSelectedBrands([]);
 
-    const doFetch = async () => {
-      try {
-        const res = await getProducts({
-          category,
-          search,
-          sort,
-          page: 1,
-          limit: 12,
-          ...(featured   ? { featured }   : {}),
-          ...(minPrice   ? { minPrice }   : {}),
-          ...(maxPrice   ? { maxPrice }   : {}),
-        });
-        setProducts(res.data.products || []);
-        setTotal(res.data.total || 0);
-        setHasMore(1 < (res.data.pages || 1));
-        const brands = [...new Set((res.data.products || []).map(p => p.brand).filter(Boolean))].sort();
-        setAllBrands(brands);
-      } catch (err) {
-        console.error('Fetch error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
+    const currentCategory = category;
+    const currentSearch   = search;
+    const currentSort     = sort;
+    const currentFeatured = featured;
+    const currentMinPrice = minPrice;
+    const currentMaxPrice = maxPrice;
 
-    doFetch();
+    getProducts({
+      category: currentCategory,
+      search:   currentSearch,
+      sort:     currentSort,
+      page:     1,
+      limit:    12,
+      ...(currentFeatured ? { featured: currentFeatured } : {}),
+      ...(currentMinPrice ? { minPrice: currentMinPrice } : {}),
+      ...(currentMaxPrice ? { maxPrice: currentMaxPrice } : {}),
+    }).then(res => {
+      setProducts(res.data.products || []);
+      setTotal(res.data.total || 0);
+      setHasMore(1 < (res.data.pages || 1));
+      const brands = [...new Set((res.data.products || []).map(p => p.brand).filter(Boolean))].sort();
+      setAllBrands(brands);
+    }).catch(err => {
+      console.error('Fetch error:', err);
+    }).finally(() => {
+      setLoading(false);
+    });
   }, [category, search, sort, featured, minPrice, maxPrice]);
 
   // ── Infinite scroll ────────────────────────────────────────
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
+    let currentPage = 1;
+
+    const observer = new IntersectionObserver(
       async (entries) => {
-        if (!entries[0].isIntersecting || !hasMore || loadingMore || loading) return;
-        setLoadingMore(true);
-        const nextPage = pageRef.current + 1;
-        pageRef.current = nextPage;
-        setPage(nextPage);
-        try {
-          const res = await getProducts({
-            category, search, sort, page: nextPage, limit: 12,
-            ...(featured ? { featured } : {}),
-            ...(minPrice ? { minPrice } : {}),
-            ...(maxPrice ? { maxPrice } : {}),
+        if (!entries[0].isIntersecting) return;
+
+        const state = stateRef.current;
+        if (!state) return;
+
+        setHasMore(prev => {
+          if (!prev) return prev;
+          return prev;
+        });
+
+        // Use functional updates to get latest state
+        setLoadingMore(prev => {
+          if (prev) return prev;
+
+          currentPage += 1;
+          const nextPage = currentPage;
+
+          getProducts({
+            category: state.category,
+            search:   state.search,
+            sort:     state.sort,
+            page:     nextPage,
+            limit:    12,
+            ...(state.featured ? { featured: state.featured } : {}),
+            ...(state.minPrice ? { minPrice: state.minPrice } : {}),
+            ...(state.maxPrice ? { maxPrice: state.maxPrice } : {}),
+          }).then(res => {
+            setProducts(p => [...p, ...(res.data.products || [])]);
+            setHasMore(nextPage < (res.data.pages || 1));
+          }).catch(err => {
+            console.error('Load more error:', err);
+          }).finally(() => {
+            setLoadingMore(false);
           });
-          setProducts(prev => [...prev, ...(res.data.products || [])]);
-          setHasMore(nextPage < (res.data.pages || 1));
-        } catch (err) {
-          console.error('Load more error:', err);
-        } finally {
-          setLoadingMore(false);
-        }
+
+          return true;
+        });
       },
       { threshold: 0.1 }
     );
-    if (loadMoreRef.current) observerRef.current.observe(loadMoreRef.current);
-    return () => observerRef.current?.disconnect();
-  }, [hasMore, loadingMore, loading, category, search, sort, featured, minPrice, maxPrice]);
+
+    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [category, search, sort, featured, minPrice, maxPrice]);
 
   const setParam = (key, val) => {
     const p = new URLSearchParams(searchParams);
@@ -144,8 +170,8 @@ export default function Products() {
     setSearchParams({});
   };
 
-  const toggleBrand     = (brand) => setSelectedBrands(prev => prev.includes(brand) ? prev.filter(b => b !== brand) : [...prev, brand]);
-  const toggleAccordion = (key)   => setAccordion(a => ({ ...a, [key]: !a[key] }));
+  const toggleBrand     = (b) => setSelectedBrands(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
+  const toggleAccordion = (k) => setAccordion(a => ({ ...a, [k]: !a[k] }));
 
   const filteredProducts = products
     .filter(p => selectedBrands.length === 0 || selectedBrands.includes(p.brand))
@@ -162,7 +188,6 @@ export default function Products() {
         <p style={{ color: 'var(--text-3)' }}>{total} products found</p>
       </div>
 
-      {/* Sort bar */}
       <div data-testid="filters-bar" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24, alignItems: 'center' }}>
         <select data-testid="sort-filter" value={sort} onChange={e => setParam('sort', e.target.value)}
           style={{ padding: '8px 14px', borderRadius: 'var(--r-full)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', fontSize: 14 }}>
@@ -185,17 +210,13 @@ export default function Products() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '240px 1fr', gap: 24, alignItems: 'start' }}>
-
-        {/* Filter Sidebar */}
         <div>
           {isMobile && (
-            <button onClick={() => setShowFilters(f => !f)}
-              data-testid="mobile-filter-toggle"
+            <button onClick={() => setShowFilters(f => !f)} data-testid="mobile-filter-toggle"
               style={{ padding: '10px 20px', background: 'var(--bg-card)', border: '1.5px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 14, fontWeight: 600, color: 'var(--text-1)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, width: '100%', justifyContent: 'center' }}>
               Filters {showFilters ? '▲' : '▼'}
             </button>
           )}
-
           {(!isMobile || showFilters) && (
             <div data-testid="filter-sidebar"
               style={{ background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--border)', padding: 20, position: isMobile ? 'static' : 'sticky', top: 80 }}>
@@ -204,8 +225,6 @@ export default function Products() {
                 <button data-testid="reset-filters-btn" onClick={resetFilters}
                   style={{ fontSize: 12, color: 'var(--fire)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Reset All</button>
               </div>
-
-              {/* Price */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 4 }}>
                 <button data-testid="filter-price-toggle" onClick={() => toggleAccordion('price')}
                   style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
@@ -231,8 +250,6 @@ export default function Products() {
                   </div>
                 )}
               </div>
-
-              {/* Brand */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 4 }}>
                 <button data-testid="filter-brand-toggle" onClick={() => toggleAccordion('brand')}
                   style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
@@ -254,8 +271,6 @@ export default function Products() {
                   </div>
                 )}
               </div>
-
-              {/* Rating */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                 <button data-testid="filter-rating-toggle" onClick={() => toggleAccordion('rating')}
                   style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
@@ -286,7 +301,6 @@ export default function Products() {
           )}
         </div>
 
-        {/* Product Grid */}
         <div>
           {loading ? (
             <div data-testid="skeleton-grid"
@@ -313,8 +327,6 @@ export default function Products() {
                   </div>
                 ))}
               </div>
-
-              {/* Infinite scroll trigger */}
               <div ref={loadMoreRef} data-testid="infinite-scroll-trigger"
                 style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {loadingMore && (
