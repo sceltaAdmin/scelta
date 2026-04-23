@@ -60,22 +60,21 @@ export default function Products() {
   const sort = searchParams.get('sort') || 'newest';
   const featured = searchParams.get('featured') || '';
 
-  // Reset and fetch fresh when filters change
   useEffect(() => {
     setProducts([]);
     setPage(1);
     setHasMore(true);
     setLoading(true);
-    fetchProducts(1, true);
+    fetchProducts(1, true, category, search, sort, featured, minPrice, maxPrice);
   }, [category, search, sort, featured, minPrice, maxPrice]);
 
-  const fetchProducts = async (pageNum, reset = false) => {
+  const fetchProducts = async (pageNum, reset = false, cat, srch, srt, feat, mn, mx) => {
     try {
       const res = await getProducts({
-        category, search, sort, page: pageNum, limit: 12,
-        ...(featured ? { featured } : {}),
-        ...(minPrice ? { minPrice } : {}),
-        ...(maxPrice ? { maxPrice } : {}),
+        category: cat, search: srch, sort: srt, page: pageNum, limit: 12,
+        ...(feat ? { featured: feat } : {}),
+        ...(mn ? { minPrice: mn } : {}),
+        ...(mx ? { maxPrice: mx } : {}),
       });
       const newProducts = res.data.products;
       const totalCount = res.data.total;
@@ -106,7 +105,7 @@ export default function Products() {
           setLoadingMore(true);
           const nextPage = page + 1;
           setPage(nextPage);
-          fetchProducts(nextPage);
+          fetchProducts(nextPage, false, category, search, sort, featured, minPrice, maxPrice);
         }
       },
       { threshold: 0.1 }
