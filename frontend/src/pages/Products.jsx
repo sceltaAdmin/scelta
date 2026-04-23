@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getProducts } from '../services/api';
 import ProductCard from '../components/ProductCard';
@@ -30,39 +30,31 @@ function SkeletonCard() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%)', animation: 'shimmer 1.5s infinite' }} />
         </div>
       </div>
-      <style>{`@keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(100%)} } @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }`}</style>
+      <style>{`@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}} @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}`}</style>
     </div>
   );
 }
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [products, setProducts]         = useState([]);
-  const [allBrands, setAllBrands]       = useState([]);
-  const [total, setTotal]               = useState(0);
-  const [hasMore, setHasMore]           = useState(true);
-  const [loading, setLoading]           = useState(true);
-  const [loadingMore, setLoadingMore]   = useState(false);
-  const [minPrice, setMinPrice]         = useState('');
-  const [maxPrice, setMaxPrice]         = useState('');
+  const [products, setProducts]     = useState([]);
+  const [allBrands, setAllBrands]   = useState([]);
+  const [total, setTotal]           = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading]       = useState(true);
+  const [minPrice, setMinPrice]     = useState('');
+  const [maxPrice, setMaxPrice]     = useState('');
   const [selectedBrands, setSelectedBrands] = useState([]);
-  const [minRating, setMinRating]       = useState(0);
-  const [accordion, setAccordion]       = useState({ price: true, brand: true, rating: true });
-  const [showFilters, setShowFilters]   = useState(false);
-  const [isMobile, setIsMobile]         = useState(window.innerWidth < 768);
-
-  const loadMoreRef = useRef();
-  const stateRef    = useRef({});
+  const [minRating, setMinRating]   = useState(0);
+  const [accordion, setAccordion]   = useState({ price: true, brand: true, rating: true });
+  const [showFilters, setShowFilters] = useState(false);
+  const [isMobile, setIsMobile]     = useState(window.innerWidth < 768);
 
   const category = searchParams.get('category') || '';
   const search   = searchParams.get('search')   || '';
   const sort     = searchParams.get('sort')     || 'newest';
   const featured = searchParams.get('featured') || '';
-
-  // Keep stateRef always current
-  useEffect(() => {
-    stateRef.current = { category, search, sort, featured, minPrice, maxPrice };
-  });
+  const page     = parseInt(searchParams.get('page') || '1');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -70,98 +62,41 @@ export default function Products() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // ── Initial fetch when filters change ─────────────────────
   useEffect(() => {
-    setProducts([]);
-    setTotal(0);
-    setHasMore(true);
     setLoading(true);
-    setSelectedBrands([]);
-
-    const currentCategory = category;
-    const currentSearch   = search;
-    const currentSort     = sort;
-    const currentFeatured = featured;
-    const currentMinPrice = minPrice;
-    const currentMaxPrice = maxPrice;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 
     getProducts({
-      category: currentCategory,
-      search:   currentSearch,
-      sort:     currentSort,
-      page:     1,
-      limit:    12,
-      ...(currentFeatured ? { featured: currentFeatured } : {}),
-      ...(currentMinPrice ? { minPrice: currentMinPrice } : {}),
-      ...(currentMaxPrice ? { maxPrice: currentMaxPrice } : {}),
+      category, search, sort, page, limit: 12,
+      ...(featured   ? { featured }   : {}),
+      ...(minPrice   ? { minPrice }   : {}),
+      ...(maxPrice   ? { maxPrice }   : {}),
     }).then(res => {
       setProducts(res.data.products || []);
       setTotal(res.data.total || 0);
-      setHasMore(1 < (res.data.pages || 1));
-      const brands = [...new Set((res.data.products || []).map(p => p.brand).filter(Boolean))].sort();
-      setAllBrands(brands);
+      setTotalPages(res.data.pages || 1);
+      if (page === 1) {
+        const brands = [...new Set((res.data.products || []).map(p => p.brand).filter(Boolean))].sort();
+        setAllBrands(brands);
+      }
     }).catch(err => {
       console.error('Fetch error:', err);
     }).finally(() => {
       setLoading(false);
     });
-  }, [category, search, sort, featured, minPrice, maxPrice]);
-
-  // ── Infinite scroll ────────────────────────────────────────
-  useEffect(() => {
-    let currentPage = 1;
-
-    const observer = new IntersectionObserver(
-      async (entries) => {
-        if (!entries[0].isIntersecting) return;
-
-        const state = stateRef.current;
-        if (!state) return;
-
-        setHasMore(prev => {
-          if (!prev) return prev;
-          return prev;
-        });
-
-        // Use functional updates to get latest state
-        setLoadingMore(prev => {
-          if (prev) return prev;
-
-          currentPage += 1;
-          const nextPage = currentPage;
-
-          getProducts({
-            category: state.category,
-            search:   state.search,
-            sort:     state.sort,
-            page:     nextPage,
-            limit:    12,
-            ...(state.featured ? { featured: state.featured } : {}),
-            ...(state.minPrice ? { minPrice: state.minPrice } : {}),
-            ...(state.maxPrice ? { maxPrice: state.maxPrice } : {}),
-          }).then(res => {
-            setProducts(p => [...p, ...(res.data.products || [])]);
-            setHasMore(nextPage < (res.data.pages || 1));
-          }).catch(err => {
-            console.error('Load more error:', err);
-          }).finally(() => {
-            setLoadingMore(false);
-          });
-
-          return true;
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    if (loadMoreRef.current) observer.observe(loadMoreRef.current);
-    return () => observer.disconnect();
-  }, [category, search, sort, featured, minPrice, maxPrice]);
+  }, [category, search, sort, featured, minPrice, maxPrice, page]);
 
   const setParam = (key, val) => {
     const p = new URLSearchParams(searchParams);
     if (val) p.set(key, val); else p.delete(key);
+    if (key !== 'page') p.delete('page');
     setSearchParams(p);
+  };
+
+  const goToPage = (p) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('page', String(p));
+    setSearchParams(params);
   };
 
   const resetFilters = () => {
@@ -179,6 +114,16 @@ export default function Products() {
 
   const hasActiveFilters = category || search || featured || minPrice || maxPrice || selectedBrands.length > 0 || minRating > 0;
 
+  // Pagination page numbers
+  const getPageNumbers = () => {
+    const pages = [];
+    const delta = 2;
+    for (let i = Math.max(1, page - delta); i <= Math.min(totalPages, page + delta); i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
+
   return (
     <main data-testid="products-page" style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 20px' }}>
       <div style={{ marginBottom: 24 }}>
@@ -188,6 +133,7 @@ export default function Products() {
         <p style={{ color: 'var(--text-3)' }}>{total} products found</p>
       </div>
 
+      {/* Sort bar */}
       <div data-testid="filters-bar" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 24, alignItems: 'center' }}>
         <select data-testid="sort-filter" value={sort} onChange={e => setParam('sort', e.target.value)}
           style={{ padding: '8px 14px', borderRadius: 'var(--r-full)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', fontSize: 14 }}>
@@ -210,6 +156,8 @@ export default function Products() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '240px 1fr', gap: 24, alignItems: 'start' }}>
+
+        {/* Filter Sidebar */}
         <div>
           {isMobile && (
             <button onClick={() => setShowFilters(f => !f)} data-testid="mobile-filter-toggle"
@@ -225,6 +173,8 @@ export default function Products() {
                 <button data-testid="reset-filters-btn" onClick={resetFilters}
                   style={{ fontSize: 12, color: 'var(--fire)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Reset All</button>
               </div>
+
+              {/* Price */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 4 }}>
                 <button data-testid="filter-price-toggle" onClick={() => toggleAccordion('price')}
                   style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
@@ -250,6 +200,8 @@ export default function Products() {
                   </div>
                 )}
               </div>
+
+              {/* Brand */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, marginBottom: 4 }}>
                 <button data-testid="filter-brand-toggle" onClick={() => toggleAccordion('brand')}
                   style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
@@ -271,6 +223,8 @@ export default function Products() {
                   </div>
                 )}
               </div>
+
+              {/* Rating */}
               <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
                 <button data-testid="filter-rating-toggle" onClick={() => toggleAccordion('rating')}
                   style={{ width: '100%', display: 'flex', justifyContent: 'space-between', background: 'none', border: 'none', cursor: 'pointer', paddingBottom: 12, color: 'var(--text-1)' }}>
@@ -301,6 +255,7 @@ export default function Products() {
           )}
         </div>
 
+        {/* Product Grid */}
         <div>
           {loading ? (
             <div data-testid="skeleton-grid"
@@ -319,7 +274,7 @@ export default function Products() {
           ) : (
             <>
               <div data-testid="products-grid"
-                style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: isMobile ? 10 : 20, marginBottom: 24 }}>
+                style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(200px, 1fr))', gap: isMobile ? 10 : 20, marginBottom: 32 }}>
                 {filteredProducts.map((p, index) => (
                   <div key={p._id} data-testid={`product-item-${p._id}`}
                     style={{ animation: 'fadeInUp 0.35s ease both', animationDelay: `${(index % 12) * 30}ms` }}>
@@ -327,22 +282,60 @@ export default function Products() {
                   </div>
                 ))}
               </div>
-              <div ref={loadMoreRef} data-testid="infinite-scroll-trigger"
-                style={{ height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                {loadingMore && (
-                  <div data-testid="loading-more-indicator"
-                    style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-3)', fontSize: 14 }}>
-                    <div className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }} />
-                    Loading more products...
-                  </div>
-                )}
-                {!hasMore && filteredProducts.length > 0 && (
-                  <div data-testid="all-products-loaded"
-                    style={{ color: 'var(--text-3)', fontSize: 13, padding: '8px 20px', border: '1px solid var(--border)', borderRadius: 'var(--r-full)' }}>
-                    All {filteredProducts.length} products loaded
-                  </div>
-                )}
-              </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div data-testid="pagination"
+                  style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 16 }}>
+
+                  {/* Prev */}
+                  <button data-testid="pagination-prev" onClick={() => goToPage(page - 1)} disabled={page === 1}
+                    style={{ padding: '8px 16px', borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: page === 1 ? 'var(--text-3)' : 'var(--text-1)', cursor: page === 1 ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: 14 }}>
+                    ← Prev
+                  </button>
+
+                  {/* First page */}
+                  {getPageNumbers()[0] > 1 && (
+                    <>
+                      <button onClick={() => goToPage(1)}
+                        style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
+                        1
+                      </button>
+                      {getPageNumbers()[0] > 2 && <span style={{ color: 'var(--text-3)' }}>...</span>}
+                    </>
+                  )}
+
+                  {/* Page numbers */}
+                  {getPageNumbers().map(p => (
+                    <button key={p} data-testid={`pagination-page-${p}`} onClick={() => goToPage(p)}
+                      style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', border: '1.5px solid', borderColor: p === page ? 'var(--fire)' : 'var(--border)', background: p === page ? 'var(--fire)' : 'var(--bg-card)', color: p === page ? '#fff' : 'var(--text-1)', cursor: 'pointer', fontWeight: 700, fontSize: 14 }}>
+                      {p}
+                    </button>
+                  ))}
+
+                  {/* Last page */}
+                  {getPageNumbers()[getPageNumbers().length - 1] < totalPages && (
+                    <>
+                      {getPageNumbers()[getPageNumbers().length - 1] < totalPages - 1 && <span style={{ color: 'var(--text-3)' }}>...</span>}
+                      <button onClick={() => goToPage(totalPages)}
+                        style={{ width: 40, height: 40, borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-1)', cursor: 'pointer', fontWeight: 600, fontSize: 14 }}>
+                        {totalPages}
+                      </button>
+                    </>
+                  )}
+
+                  {/* Next */}
+                  <button data-testid="pagination-next" onClick={() => goToPage(page + 1)} disabled={page === totalPages}
+                    style={{ padding: '8px 16px', borderRadius: 'var(--r-sm)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: page === totalPages ? 'var(--text-3)' : 'var(--text-1)', cursor: page === totalPages ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize: 14 }}>
+                    Next →
+                  </button>
+
+                  {/* Page info */}
+                  <span style={{ fontSize: 13, color: 'var(--text-3)', marginLeft: 8 }}>
+                    Page {page} of {totalPages} · {total} products
+                  </span>
+                </div>
+              )}
             </>
           )}
         </div>
