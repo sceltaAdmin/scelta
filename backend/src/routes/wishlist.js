@@ -3,6 +3,7 @@ const auth = require('../middleware/auth');
 const Wishlist = require('../models/Wishlist');
 
 router.get('/', auth, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   try {
     const wishlist = await Wishlist.findOne({ user: req.user._id }).populate('products');
     res.json({ success: true, wishlist: wishlist?.products || [] });
