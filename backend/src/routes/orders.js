@@ -4,6 +4,7 @@ const Order = require('../models/Order');
 const Cart = require('../models/Cart');
 
 router.get('/', auth, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   try {
     const orders = await Order.find({ user: req.user._id }).sort({ createdAt: -1 });
     res.json({ success: true, orders });
