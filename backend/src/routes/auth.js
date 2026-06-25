@@ -42,6 +42,7 @@ router.post('/logout', auth, (req, res) => {
 });
 
 router.get('/me', auth, (req, res) => {
+  res.set('Cache-Control', 'no-store');
   res.json({ success: true, user: req.user });
 });
 
