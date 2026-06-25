@@ -4,6 +4,7 @@ const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 
 router.get('/', auth, async (req, res) => {
+  res.set('Cache-Control', 'no-store');
   try {
     const cart = await Cart.findOne({ user: req.user._id }).populate('items.product');
     if (!cart) return res.json({ success: true, cart: { items: [], subtotal: 0, discount: 0, total: 0 } });
